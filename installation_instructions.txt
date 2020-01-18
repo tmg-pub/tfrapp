@@ -48,7 +48,7 @@ https://developers.google.com/oauthplayground/#step1&scopes=https%3A%2F%2Fwww.go
 
 Press Authorize APIs, and then Exchange authorization code for tokens.
 
-Copy the refresh token generated and put it in `private/client_refesh.json`
+Copy the refresh token generated and put it in `private/client_refresh.json`
 which should look like this:
 
 {
