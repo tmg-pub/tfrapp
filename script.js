@@ -79,7 +79,7 @@ function addAutoResize() {
    document.querySelectorAll('textarea').forEach( element => {
       element.style.boxSizing = 'border-box';
       var offset = element.offsetHeight - element.clientHeight;
-      document.addEventListener( 'input', event => {
+      $(element).on( 'input', event => {
          event.target.style.height = 'auto';
          event.target.style.height = event.target.scrollHeight + offset + 'px';
       });
@@ -119,7 +119,11 @@ function AddContentHeader( title_html, description_html ) {
 // Try and load a cached value for a form field.
 function LoadFieldsave( element, key ) {
    var saved = localStorage.getItem( "field:" + key );
-   if( saved ) element.val( saved );
+   if( saved ) {
+      element.val( saved );
+      //autoResizeText( element );
+      setTimeout( () => {element.trigger('input');},0.1 );
+   }
 }
 
 //-----------------------------------------------------------------------------
