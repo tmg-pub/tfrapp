@@ -20,7 +20,25 @@ private/config.yaml holds most of your configuration.
 See config.yaml.example for an example script.
 
 
-3. Create your authorization files.
+3. Install required libraries
+-------------------------------------------------------------------------------
+On the server:
+
+pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+pip install --upgrade mysql-connector
+pip install --upgrade pyyaml
+
+
+4. Deal with hassles
+-------------------------------------------------------------------------------
+For some inane reason, the year is 2020 and linux fucks up reading the shebang
+if line endings are crlf.
+
+Shared hosting may want you to jump through some hoops to install any required
+packages. I had to install a custom version of python for dreamhost.
+
+
+5. Create your authorization files.
 -------------------------------------------------------------------------------
 This part may be a bit painful. The things you need to create are a service
 account as well as a "web client".
