@@ -399,6 +399,12 @@ function LoadNormal() {
       $("#buttons").removeClass( "hide" )
       
       addAutoResize();
+   }).fail( ( error ) => {
+      HideLoading();
+      console.log( error );
+      Notify( "The server is experiencing problems. Please try again later.",
+              "#c40000", "#fff" );
+      return;
    });
 }
 
