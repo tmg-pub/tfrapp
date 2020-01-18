@@ -1,0 +1,62 @@
+1. Upload to the server.
+-------------------------------------------------------------------------------
+Upload the contents of the app to the server minus any private files (beginning
+with dots).
+
+A .devmode file present in the base directory will trigger developer mode,
+alternatively triggered through a password in the request.
+
+Make sure the folders named "private" and "logs" have strict permissions on the
+server, to prevent anything outside from reading the contents. They includes an
+.htaccess file to deny the web, but there are other things that may creep in
+there.
+
+TODO: understand Unix permissions. :)
+
+2. Configure the application.
+-------------------------------------------------------------------------------
+private/config.yaml holds most of your configuration.
+
+See config.yaml.example for an example script.
+
+
+3. Create your authorization files.
+-------------------------------------------------------------------------------
+This part may be a bit painful. The things you need to create are a service
+account as well as a "web client".
+
+Your project should have a google... "project" attached. Go here to get to the
+control panel (good link as of 2020).
+https://console.developers.google.com/apis/
+
+Under Credentials, create a Service Account key. Don't need to give it any
+roles, just a name. (I THINK?)
+
+Save the service account key .json file to `private/service_account.json`.
+
+Next, under Credentials, create a OAuth client ID. Type can be WEB, and make
+sure this is put in the redirect URIs:
+
+https://developers.google.com/oauthplayground
+
+This will allow the OAuth playground to generate keys for you. Save this key
+to `private/oauth_client.json`.
+
+Follow this link to visit Google's oauth playground. Enter your OAuth client ID
+and client secret in the configuration box.
+https://developers.google.com/oauthplayground/#step1&scopes=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fscript.scriptapp%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdocuments%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive&url=https%3A%2F%2F&content_type=application%2Fjson&http_method=GET&useDefaultOauthCred=checked&oauthEndpointSelect=Google&oauthAuthEndpointValue=https%3A%2F%2Faccounts.google.com%2Fo%2Foauth2%2Fv2%2Fauth&oauthTokenEndpointValue=https%3A%2F%2Fwww.googleapis.com%2Foauth2%2Fv4%2Ftoken&includeCredentials=unchecked&accessTokenType=bearer&autoRefreshToken=unchecked&accessType=offline&prompt=consent&response_type=code&wrapLines=on
+
+Press Authorize APIs, and then Exchange authorization code for tokens.
+
+Copy the refresh token generated and put it in `private/client_refesh.json`
+which should look like this:
+
+{
+   "refresh": "83u8uh83y5a9p238y5apw8935paw85apw85pwa98"
+}
+
+If there is a `private/client_access.json`, delete it. That's a temporary file
+generated with a previous refresh token.
+
+The last step here should be made easier in the future with a script to
+generate the required tokens on a local client.

@@ -1,0 +1,308 @@
+/* Serve morpheus.woff to the client. Authentic wowness. While this would be
+ * more immersive to use for EVERYTHING, we don't want to cripple the user's
+ * ability to read their writing for mistakes. */
+@font-face {
+   font-family: "Morpheus";
+   src: url( 'morpheus.woff' );
+}
+
+body {
+   /* Background-size: cover is a little wonky. Center seems to work out OK,
+    * but I'd really like the content to not resize when the scrollbar
+    * appears.
+    */
+	background: url('img/background.jpg') no-repeat center center fixed;
+	background-size: cover;
+}
+
+/* The content wrapper is for fading in after the page loads. */
+#content {
+   opacity: 1;
+	transition: opacity 1s;
+}
+
+/* `hide` class is set at the start. */
+#content.hide {
+   opacity: 0;
+}
+
+/* This div holds the parchment or background textures. */
+#content_bg {
+	position: relative;
+	padding: 16px;
+	margin: auto;
+	margin-top:64px;
+	width: 650px;
+}
+
+/* This div holds the main page contents. */
+#content_shell {
+	color: #0f0a05;
+	text-align: justify;
+	padding: 16px 40px;
+	text-shadow: 0px 0px 1px rgba(0.38, 0.26, 0.13, 0.4);
+	margin-bottom: 64px;
+   font-family: PT Serif;
+}
+
+/* Styles for the page follow. */
+
+p {
+   font-family:inherit;
+}
+
+h2 {
+	font-family: Morpheus;
+	font-size: 28px;
+	font-weight: normal;
+	text-transform: uppercase;
+	margin: 0px;
+	margin-top: 32px;
+	border-bottom: 1px solid #624420;
+	margin-bottom: 3px;
+}
+
+h2.first {
+	margin-top: 0px;
+}
+
+/* The text underneath a section divider on the form. */
+.section_desc {
+	font-size: 16px;
+	font-style: oblique;
+	margin-top: 0px;
+   margin-bottom: 32px;
+}
+
+/* The question text on the form. */
+.prompt {
+	font-size: 16px;
+}
+
+/* This appears at the top when the user needs to correct an error. */
+#error {
+   font-family: PT Serif;
+	font-size: 20px;
+   color: #c30000;
+   font-weight: bold;
+   text-shadow: 0px 0px 2px #fff;
+   font-style: italic;
+}
+
+/* This class can be applied to prompts to append a notice that tells them it's
+ * a required field. 
+ */
+.required:after {
+   content: " (Required field.)";
+   color: #c30000;
+   font-weight: bold;
+   text-shadow: 0px 0px 2px #fff;
+}
+
+/* Style without focus borders, fill width, and the auto-resizing is done
+ * through a script hook.
+ */
+textarea {
+	width: 100%;
+	border: none;
+	border-bottom: 1px dotted #624420;
+	outline: 0px none transparent;
+	font-family: PT Serif;
+	font-size: 20px;
+	resize: none;
+	background:none;
+	text-shadow: inherit;
+}
+
+.parchment {
+	position: absolute;
+	left: 0px;
+	width: 682px;
+	z-index: -1;
+}
+
+/* The top piece overlaps the middle a bit to avoid pixel errors when using
+ * different zoom levels.
+ */
+.parchment.top {
+	top: 0px;
+	height: 315px;
+	background: url('img/parchment_top.png') no-repeat left top;
+}
+
+/* Middle piece repeats until the bottom piece. */
+.parchment.middle {
+	top: 311px; /* This needs to align perfectly. The top is a bit larger to
+                * overlap to hide errors when zooming. */
+	bottom: 147px; /* This is the height of the opaque region of the bottom 
+                     texture, not including the alpha gradient. */
+	background: url('img/parchment_middle.png') repeat-y left top;
+}
+
+/* The bottom texture has a gradient alpha transition to fade in from the
+ * repeating section.
+ */
+.parchment.bottom {
+	bottom: 0px;
+	height: 235px;
+	background: url('img/parchment_bottom.png') no-repeat left top;
+}
+
+/* This is the buttons container. */
+.buttons {
+   width: 100%;
+   text-align:center;
+   opacity: 1;
+	transition: opacity 1s;
+}
+
+.buttons.hide {
+	transition: opacity 0.5s;
+   opacity: 0.0;
+}
+
+/* This contains the background and mouse interaction. */
+.bigbutton {
+   display: inline-block;
+   position: relative;
+	font-family: Morpheus;
+   text-transform: uppercase;
+	font-size: 24px;
+   text-align: center;
+   height: 100px;
+   width: 305px;
+   margin: 0px -32px;
+   background: url('img/button.png') no-repeat center top;
+   transform: scale(0.75);
+}
+
+.bigbutton:hover {
+   /* Use a brightness filter instead of the hover texture. */
+   /*background-position-y: -100px;*/
+   filter: brightness(108%);
+}
+
+.bigbutton:active {
+   background-position-y: -200px;
+}
+
+/* Centered caption. */
+.bigbutton .caption {
+   user-select: none;
+   position: absolute;
+   top: 27px;
+   left: 3px;
+   width: 100%;
+   text-shadow: 0px 0px 3px rgba( 255,255,255,0.5);
+}
+.bigbutton:active .caption {
+   top: 28px;
+   
+}
+
+/* Loading bar is a fixed div at the top of the page. It uses transitions to
+ * animate a filling bar, but doesn't actually refer to an actual progress
+ * source. It's just for feedback to let the user know something is loading
+ * in the background.
+ */
+#loadbar_bg {
+   position: fixed;
+   left: 0;
+   top: 0;
+   width:100%;
+   height: 2px;
+   padding: 0px;
+   margin: 0px;
+   background-color: rgba(0,0,0,0.5);
+   transition: opacity 0.3s linear;
+   opacity: 0.0;
+}
+
+#loadbar_bg.active {
+   opacity: 1.0;
+   transition: opacity 0.3s linear;
+}
+
+#loadbar_fg {
+   position: absolute;
+   left: 0;
+   top: 0;
+   width: 0%;
+   height: 100%;
+   /* Not sure what color is best with what theme we have, but hard white seems
+    * to look okay.
+    */
+   background-color: #fff;
+   
+   /* A cool glow. */
+   box-shadow: 0px 0px 8px #fff;
+}
+
+#loadbar_fg.active {
+   width: 100%;
+   transition: width 10s linear;
+}
+
+/* Notification box. Consists of a fullscreen backdrop to block interaction, a
+ * simple box, and then the html text.
+ */
+#notify {
+   position: fixed;
+   left: 0;
+   top: 0;
+   width: 100%;
+   height: 100%;
+   background-color: rgba( 0, 0, 0, 0.25 );
+   vertical-align: middle;
+   transition: opacity 0.5s;
+   opacity: 0;
+   pointer-events: none;
+   /* Kind of nasty to not have display:none and visibility:none on this thing,
+    * but those things seem to break the fading transitions and would be a pain
+    * in the ass to get to work right.
+    */
+}
+
+#notify.visible {
+   transition: opacity 0.5s;
+   opacity: 1;
+   display: block;
+   pointer-events: auto;
+}
+
+#notify_box {
+   position: relative;
+   border-radius: 4px;
+   font-family: PT Serif;
+   font-size: 18px;
+   padding: 32px 32px 32px 32px;
+   
+   margin: auto;
+   background-color: white;
+   width: 400px;
+   text-align: center;
+   margin-top: 100px;
+}
+
+#notify_content {
+   pointer-events: none;
+   user-select: none;
+}
+
+#notify_help {
+   pointer-events: none;
+   user-select: none;
+   font-size: 12px;
+   position: absolute;
+   text-align: center;
+   width: 100%;
+   bottom: 4px;
+   left: 0px;
+   opacity: 0;
+   transition: opacity 0.5s;
+}
+
+#notify.visible #notify_help {
+   opacity: 1;
+   transition: opacity 0.5s 3s;
+}

@@ -1,0 +1,22 @@
+root = true
+
+[*]
+end_of_line = crlf
+
+# 4 space indentation
+[*.py]
+indent_style = space
+indent_size  = 3
+
+# Indentation override for all JS under lib directory
+[*.js]
+indent_style = space
+indent_size  = 3
+
+[*.css]
+indent_style = space
+indent_size  = 3
+
+[*.gs]
+indent_style = space
+indent_size  = 2

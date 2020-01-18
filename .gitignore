@@ -1,0 +1,6 @@
+private/*
+!private/.htaccess
+logs/*
+!logs/.htaccess
+__pycache__
+.devmode

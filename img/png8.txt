@@ -1,0 +1,3 @@
+If someone can tell me an easy way to convert png32 to png8 with 32-bit (ALPHA)
+color support in the palette, it'd be appreciated.
+ImageMagick documentation is fucking huge.

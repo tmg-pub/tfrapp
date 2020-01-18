@@ -1,0 +1,25 @@
+
+# ID of Apps Script to use. This should point to a script project on
+# Google Apps Scripts which contains the code in `gs`.
+tfr_apps_script: "WW91IGFyZSBhIGZ1Y2tpbmcgaWRpb3QgZm9yIGRlY29kaW5nIHRoaXMh-"
+
+# If "devmode" in the request is set to this password,
+# then devMode will be set when calling the Apps script.
+# What that does is makes it use the latest revision
+# rather than the deployed one.
+devmode_password: "VGhpcyBzaG91bGQgYmUgbW9yZSB0aGFuIGJhc2U2NC4u"
+
+# Document ID of the form template/configuration.
+form_config_docid: "QSB2ZXJ5IGFwdGx5IG5hbWVkIGRvY3VtZW50IElELi4u"
+
+# SQL database access information.
+sql:
+   host     : "mysql.minecraft.net"
+   user     : "johnny"
+   password : "password"
+   database : "guild_data"
+
+# List of Discord webhooks to broadcast updates to.
+webhooks:
+ - url: "https://discordapp.com/api/webhooks/667885980094562334/eNViZSC-hEAw0a0pavbNJsbgwzLSofVB6MpOsOZD3_8hh4WyQn38kysWuzlcRtsyRNMR"
+
