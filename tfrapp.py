@@ -6,6 +6,7 @@
 import google.oauth2.credentials
 import google.auth.transport.requests
 from googleapiclient.discovery import build
+from google.oauth2 import service_account
 from googleapiclient import errors
 import json
 from datetime import datetime
@@ -121,8 +122,8 @@ def LookupDocid( dbc, editcode ):
 def ExecuteAppsScript( request, script_id ):
    gscripts = GetGoogleScriptsService()
    try:
-      response = gscrips.scripts().run(
-         body = request,
+      response = gscripts.scripts().run(
+         body     = request,
          scriptId = script_id
       ).execute()
       

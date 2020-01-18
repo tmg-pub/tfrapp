@@ -1,10 +1,7 @@
 #!/usr/bin/env python3
 # TFRAPP by Potter-MoonGuard (c) 2020
-import re
-from googleapiclient.discovery import build
-from google.oauth2 import service_account
-import json
 import tfrapp as Me
+import re
 
 #------------------------------------------------------------------------------
 # This reads the configuration/template file from a Google doc and parses out

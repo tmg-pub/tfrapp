@@ -45,7 +45,7 @@ def main():
    response = Me.ExecuteAppsScript(
                {
                   "function"   : "API_SubmitApplication",
-                  "devMode"    : Me.Devmode(),
+                  "devMode"    : Me.Devmode( input.get("devmode") ),
                   "parameters" : [ script_request ]
                }, 
                Me.config["tfr_apps_script"]

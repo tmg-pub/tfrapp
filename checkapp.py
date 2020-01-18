@@ -25,7 +25,7 @@ def main():
    
    request = {
       "function"   : "API_Check",
-      "devMode"    : Me.Devmode(),
+      "devMode"    : Me.Devmode( input.get("devmode") ),
       "parameters" : [{
          "docid"      : docid,
          "editcode"   : editcode
