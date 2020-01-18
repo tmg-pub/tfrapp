@@ -112,6 +112,10 @@ textarea {
 	resize: none;
 	background:none;
 	text-shadow: inherit;
+   
+   /* This little magic flower FIXES A STUPID BUG with auto-resizing in
+    * Firefox. Fuck Firefox by the way!!! */
+   overflow-x: hidden;
 }
 
 .parchment {
