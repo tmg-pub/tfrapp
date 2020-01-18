@@ -3,7 +3,7 @@
  * ability to read their writing for mistakes. */
 @font-face {
    font-family: "Morpheus";
-   src: url( 'morpheus.woff' );
+   src: url( 'res/morpheus.woff' );
 }
 
 body {
@@ -11,7 +11,7 @@ body {
     * but I'd really like the content to not resize when the scrollbar
     * appears.
     */
-	background: url('img/background.jpg') no-repeat center center fixed;
+	background: url('res/background.jpg') no-repeat center center fixed;
 	background-size: cover;
 }
 
@@ -127,7 +127,7 @@ textarea {
 .parchment.top {
 	top: 0px;
 	height: 315px;
-	background: url('img/parchment_top.png') no-repeat left top;
+	background: url('res/parchment_top.png') no-repeat left top;
 }
 
 /* Middle piece repeats until the bottom piece. */
@@ -136,7 +136,7 @@ textarea {
                 * overlap to hide errors when zooming. */
 	bottom: 147px; /* This is the height of the opaque region of the bottom 
                      texture, not including the alpha gradient. */
-	background: url('img/parchment_middle.png') repeat-y left top;
+	background: url('res/parchment_middle.png') repeat-y left top;
 }
 
 /* The bottom texture has a gradient alpha transition to fade in from the
@@ -145,7 +145,7 @@ textarea {
 .parchment.bottom {
 	bottom: 0px;
 	height: 235px;
-	background: url('img/parchment_bottom.png') no-repeat left top;
+	background: url('res/parchment_bottom.png') no-repeat left top;
 }
 
 /* This is the buttons container. */
@@ -172,7 +172,7 @@ textarea {
    height: 100px;
    width: 305px;
    margin: 0px -32px;
-   background: url('img/button.png') no-repeat center top;
+   background: url('res/button.png') no-repeat center top;
    transform: scale(0.75);
 }
 
