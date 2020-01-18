@@ -215,9 +215,8 @@ function ShowApplication() {
       }
       
       if( !has_all_required_fields ) {
-         window.scrollTo( 0, 0 );
          Notify( "Please fill out all of the required fields.",
-                 "#e56b08", "#fff" );
+                 "#c40000", "#fff" );
          return;
       }
       
