@@ -27,13 +27,13 @@ def main():
       "function"   : "API_Check",
       "devMode"    : Me.Devmode( input.get("devmode") ),
       "parameters" : [{
-         "docid"      : docid,
-         "editcode"   : editcode
-      }]
+         "docid"       : docid,
+         "editcode"    : editcode,
+         "apps_folder" : Me.config["apps_folder"]
+      }],
    }
    
    response = Me.ExecuteAppsScript( request, Me.config["tfr_apps_script"] );
-
    if not response:
       Me.Abort()
    else:

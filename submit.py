@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # TFRAPP by Potter-MoonGuard (c) 2020
-from tfrapp as Me
+import tfrapp as Me
 import uuid
 
 #------------------------------------------------------------------------------
@@ -33,20 +33,22 @@ def main():
       #  where they are converted to 16-byte binary values.
       editcode = uuid.uuid4().hex
    
-   script_request = {
+   script_arg = {
       "app": {
          "parts": input["parts"]
-      }
-      "editcode": editcode
+      },
+      "editcode": editcode,
+      "apps_folder": Me.config["apps_folder"],
+      "discord": Me.config["discord_webhooks"]
    }
    
-   if docid: script_request["docid"] = docid
-
+   if docid: script_arg["docid"] = docid
+   
    response = Me.ExecuteAppsScript(
                {
                   "function"   : "API_SubmitApplication",
                   "devMode"    : Me.Devmode( input.get("devmode") ),
-                  "parameters" : [ script_request ]
+                  "parameters" : [ script_arg ]
                }, 
                Me.config["tfr_apps_script"]
    );

@@ -147,8 +147,9 @@ def ExecuteAppsScript( request, script_id ):
          response = None;
    except errors.HttpError as e:
       # The API encountered a problem before the script started executing.
-      LogError( "HTTP Error: " + e.content )
-      
+      LogError( "HTTP Error" )
+      LogError( e.content )
+      response = None
    return response
       
 #------------------------------------------------------------------------------

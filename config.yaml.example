@@ -12,6 +12,9 @@ devmode_password: "VGhpcyBzaG91bGQgYmUgbW9yZSB0aGFuIGJhc2U2NC4u"
 # Document ID of the form template/configuration.
 form_config_docid: "QSB2ZXJ5IGFwdGx5IG5hbWVkIGRvY3VtZW50IElELi4u"
 
+# ID of the Google Drive folder where applications will be stored.
+apps_folder: "QnJlYWtmYXN0IGlzIHRoZSBtb3N0IGltc"
+
 # SQL database access information.
 sql:
    host     : "mysql.minecraft.net"
@@ -20,6 +23,6 @@ sql:
    database : "guild_data"
 
 # List of Discord webhooks to broadcast updates to.
-webhooks:
+discord_webhooks:
  - url: "https://discordapp.com/api/webhooks/667885980094562334/eNViZSC-hEAw0a0pavbNJsbgwzLSofVB6MpOsOZD3_8hh4WyQn38kysWuzlcRtsyRNMR"
 
