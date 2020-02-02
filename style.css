@@ -45,7 +45,7 @@ body {
    font-family: PT Serif;
 }
 
-/* Styles for the page follow. */
+/* Styles for the page. */
 
 p {
    font-family:inherit;
@@ -205,9 +205,9 @@ textarea {
 }
 
 /* Loading bar is a fixed div at the top of the page. It uses transitions to
- * animate a filling bar, but doesn't actually refer to an actual progress
- * source. It's just for feedback to let the user know something is loading
- * in the background.
+ * animate a filling bar, and doesn't actually refer to an actual progress
+ * source. It's just for visual feedback to let the user know something is
+ * loading.
  */
 #loadbar_bg {
    position: fixed;
