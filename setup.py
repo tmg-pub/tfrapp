@@ -11,7 +11,7 @@ if len(sys.argv) < 2:
 #//////////////////////////////////////////////////////////////////////////////
 def BasicSetup():
    db, dbc = Me.ConnectToDatabase()
-   dbc.execute( """DROP TABLE Apps""" )
+   #dbc.execute( """DROP TABLE Apps""" )
    
    # editcode: The code that we can use to edit or read the application.
    # docid: The ID of the generated Google document that the app is linked to.
