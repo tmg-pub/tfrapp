@@ -14,6 +14,8 @@ import os, sys
 import mysql.connector
 import traceback
 import yaml
+import random
+import time
 
 #------------------------------------------------------------------------------
 with open( "private/config.yaml", "rb" ) as fp:
@@ -21,6 +23,8 @@ with open( "private/config.yaml", "rb" ) as fp:
 
 devmode = os.path.exists( ".devmode" )
 output = [];
+
+now = int(time.time())
 
 #------------------------------------------------------------------------------
 # Abort the script and respond with HTTP 500. We can be lazy because this isn't
@@ -41,7 +45,7 @@ def Devmode( password ):
 #  headers first. Everything is output at once when `Run` finishes.
 # Non-string input will be converted using json.dumps.
 def Output( data ):
-   if type( data ) != "string":
+   if type( data ) != str:
       data = json.dumps( data );
    output.append( data );
    
@@ -107,13 +111,38 @@ def ConnectToDatabase():
 # Helper function to fetch a document ID from an editcode, using an active
 #                                                      database connection.
 def LookupDocid( dbc, editcode ):
-   dbc.execute( "SELECT docid FROM Apps WHERE editcode=%(editcode)s", 
-                {"editcode": bytearray.fromhex(editcode)} )
+   dbc.execute( "SELECT docid FROM Apps WHERE editcode=%(editcode)s",
+                {
+                   "editcode": editcode
+                })
    result = dbc.fetchone()
    if result: return result[0]
    
    # Not found.
    return None
+   
+#------------------------------------------------------------------------------
+# Generates a new editcode.
+def MakeEditcode():
+   # 6 characters long.
+   # Generated from a set of characters that are easy to recognized in the
+   #  default ingame WoW mail font.
+   # Must not generated the same 3 letters in a row.
+   # Must not exist in the database yet (chance of collision is too low for
+   #  me to care though.)
+   code = ""
+   # No I - looks like 1, l
+   # No O - looks like 0
+   # No U - looks like V
+   # No 1/2 - looks like I, l, Z
+   
+   characters = "ABCDEFGHJKLMNPQRSTVWXYZ345679"
+   while len(code) < 6:
+      char = random.choice( characters )
+      if len(code) > 2 and char == code[-1] and char == code[-2]: continue
+      code += char
+      
+   return code
    
 #------------------------------------------------------------------------------
 # Execute a Google Apps script. This handles all of the setup of getting
@@ -135,15 +164,14 @@ def ExecuteAppsScript( request, script_id ):
          # an list of stack trace elements.
          with open( LogFilePath( "errors" ), "a" ) as f:
             error = response['error']['details'][0]
-            LogError( "Script error message: {0}".format(error['errorMessage']) )
+            LogError( "Script error message: %s" % error['errorMessage'] )
 
             if 'scriptStackTraceElements' in error:
                # There may not be a stacktrace if the script didn't start
                # executing.
                LogError( "Script error stacktrace:" )
                for trace in error['scriptStackTraceElements']:
-                  LogError( "\t{0}: {1}".format(trace['function'],
-                     trace['lineNumber']) )
+                  LogError( "\t%s: %s" % (trace['function'], trace['lineNumber']) )
          response = None;
    except errors.HttpError as e:
       # The API encountered a problem before the script started executing.
@@ -183,8 +211,8 @@ def GetGoogleCredentials():
    creds = google.oauth2.credentials.Credentials(
       client_access["access_token"] if client_access else None,
       refresh_token = client_token["refresh"],
-      token_uri = oauth_info["web"]["token_uri"],
-      client_id = oauth_info["web"]["client_id"],
+      token_uri     = oauth_info["web"]["token_uri"],
+      client_id     = oauth_info["web"]["client_id"],
       client_secret = oauth_info["web"]["client_secret"] )
       
    if creds.valid:
@@ -234,7 +262,8 @@ def DebugLog( *args ):
    if not debugfile:
       now = datetime.now()
       debugfile = open( LogFilePath("debug"), 'a' )
-      print( "-- %s - %s --" % (sys.argv[0], now.strftime('%Y-%m-%d  %H:%M:%S')), file = debugfile )
+      print( "-- %s - %s --" % (sys.argv[0], now.strftime('%Y-%m-%d  %H:%M:%S')),
+             file = debugfile )
    print( *args, file = debugfile )
    
 #------------------------------------------------------------------------------
@@ -246,7 +275,8 @@ def LogError( *args ):
    now = datetime.now()
    if not errorfile:
       errorfile = open( LogFilePath("errors"), 'a' )
-      print( "-- %s - %s --" % (sys.argv[0], now.strftime('%Y-%m-%d  %H:%M:%S')), file = errorfile )
+      print( "-- %s - %s --" % (sys.argv[0], now.strftime('%Y-%m-%d  %H:%M:%S')),
+             file = errorfile )
    print( now.strftime('[%Y-%m-%d %H:%M:%S]'), *args, file = errorfile )
    
 #------------------------------------------------------------------------------

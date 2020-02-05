@@ -1,0 +1,16 @@
+RewriteEngine on
+
+# Dummy rule to set our base path variable.
+# Change this to match your server folder.
+RewriteRule .* - [E=TFRAPP_BASE_PATH:/tfrapp]
+
+# This rule catches /app/edit/xyz and maps it to /app?edit=xyz
+# L = stop the script after this rule is found
+# R = HTTP redirect (can change this to permanent/301 for production.
+# QSA = Append any other query string onto the redirected URL.
+# NC = Not case sensitive match.
+RewriteRule ^edit\/([a-z0-9]{5})$ %{ENV:TFRAPP_BASE_PATH}/?edit=$1 [L,R,QSA,NC]
+
+# For simple filenames without extensions, suffix .py for python scripts.
+# END = This is final, don't run this script again before serving the new path.
+RewriteRule ^([a-z0-9]+)$ %{ENV:TFRAPP_BASE_PATH}/$1.py [L,QSA,NC,END]

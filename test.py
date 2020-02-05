@@ -7,6 +7,13 @@ import tfrapp as Me
 
 def main():
 
+   Me.Put( Me.MakeEditcode() )
+   Me.Put( Me.MakeEditcode() )
+   Me.Put( Me.MakeEditcode() )
+   Me.Put( Me.MakeEditcode() )
+   Me.Put( Me.MakeEditcode() )
+   
+   return 
    # db, dbc = ConnectToDatabase();
    # result = dbc.execute( "INSERT INTO Apps (editcode, docid) VALUES ( %(editcode)s, %(docid)s )", { 
          # "editcode":bytearray.fromhex("dead1234"), 
@@ -14,10 +21,10 @@ def main():
       # })
    # db.commit()
    # print( result )
-
+   
    # return
-   """Runs the sample.
-   """
+   
+   """ Example to run the test script on the apps script thing. """
    SCRIPT_ID = Me.config["tfr_apps_script"]
    
    gscripts = Me.GetGoogleScriptsService()

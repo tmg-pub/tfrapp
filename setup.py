@@ -11,13 +11,29 @@ if len(sys.argv) < 2:
 #//////////////////////////////////////////////////////////////////////////////
 def BasicSetup():
    db, dbc = Me.ConnectToDatabase()
+   dbc.execute( """DROP TABLE Apps""" )
    
+   # editcode: The code that we can use to edit or read the application.
+   # docid: The ID of the generated Google document that the app is linked to.
+   # updated: The time (posix) that we last updated the app. Can be used to
+   #          expire old edit links so they can't build up.
+   # contents: Contents of their application, store in JSON.
    dbc.execute( """
       CREATE TABLE IF NOT EXISTS Apps (
-        submission_id BINARY(16) PRIMARY KEY,
-        docid VARCHAR(128)
+        editcode VARCHAR(16) PRIMARY KEY,
+        docid VARCHAR(128),
+        updated BIGINT,
+        content TEXT
       )
    """)
+   
+#   dbc.execute( """
+#      CREATE TABLE IF NOT EXISTS EditKeys (
+#        shortcut VARCHAR(16) PRIMARY KEY,
+#        editcode BINARY(16) UNIQUE,
+#        expires BIGINT
+#      )
+#   """)
    
 if sys.argv[1] == "run":
    BasicSetup()

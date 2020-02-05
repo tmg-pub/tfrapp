@@ -1,0 +1,8 @@
+editcodes are using short form now
+parse editcode from query string
+conver to uppercase.
+
+maintenance must be run
+---
+.htaccess
+

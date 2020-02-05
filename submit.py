@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # TFRAPP by Potter-MoonGuard (c) 2020
 import tfrapp as Me
-import uuid
+import json
 
 #------------------------------------------------------------------------------
 # API for users to submit applications.
@@ -15,7 +15,7 @@ import uuid
 def main():
    input = Me.GetRequestBody()
    
-   db, dbc = Me.ConnectToDatabase()
+   db, dbc  = Me.ConnectToDatabase()
    docid    = None
    editcode = None
    
@@ -24,52 +24,66 @@ def main():
       editcode = input["editcode"]
       docid = Me.LookupDocid( dbc, editcode )
       if not docid:
+         # That editcode isn't registered.
+         # In the future, we should block people from testing too many
+         #  editcodes.
          Me.Abort()
    
    newdoc = False
    if not docid:
-      newdoc = True
-      # Editcodes are stored as hex everywhere except for in the database,
-      #  where they are converted to 16-byte binary values.
-      editcode = uuid.uuid4().hex
+      newdoc   = True
+      editcode = Me.MakeEditcode()
    
    script_arg = {
-      "app": {
+      "editcode"    : editcode,
+      "apps_folder" : Me.config["apps_folder"],
+      "discord"     : Me.config["discord_webhooks"],
+      "app"         : {
          "parts": input["parts"]
       },
-      "editcode": editcode,
-      "apps_folder": Me.config["apps_folder"],
-      "discord": Me.config["discord_webhooks"]
    }
-   
+   # If this is set, then an existing document will be updated,
+   # otherwise, a new document will be created.
    if docid: script_arg["docid"] = docid
    
    response = Me.ExecuteAppsScript(
-               {
-                  "function"   : "API_SubmitApplication",
-                  "devMode"    : Me.Devmode( input.get("devmode") ),
-                  "parameters" : [ script_arg ]
-               }, 
-               Me.config["tfr_apps_script"]
+      {
+         "function"   : "API_SubmitApplication",
+         "devMode"    : Me.Devmode( input.get("devmode") ),
+         "parameters" : [ script_arg ]
+      },
+      Me.config["tfr_apps_script"]
    );
    
    if not response:
       Me.Abort()
    else:
       if response["response"]["result"]["status"] == "OK":
-      
-         if newdoc:
-            # If we made a new document, then record the docid in the database
-            #                                  under the editcode that we used.
-            dbc.execute( "INSERT INTO Apps (editcode, docid) "
-                        +"VALUES (%(editcode)s, %(docid)s)", {
-                        "editcode": bytearray.fromhex(editcode),
-                        "docid": response["response"]["result"]["docid"] })
-            db.commit()
          
-         Me.Output({ "status"   : "SUBMITTED",
-                     "editcode" : editcode   })
+         Me.DebugLog( "h3i" )
+         # Save a record in our database of everything so that the user can
+         #  easily access it through the editcode.
+         dbc.execute(
+            "INSERT INTO Apps (editcode, docid, updated, content) "
+            "VALUES (%(editcode)s, %(docid)s, %(updated)s, %(content)s ) "
+            "ON DUPLICATE KEY UPDATE updated=%(updated)s, content=%(content)s",
+            {
+               "editcode": editcode,
+               "docid": response["response"]["result"]["docid"],
+               "updated": Me.now,
+               "content": json.dumps( input["parts"] )
+            }
+         )
+         Me.DebugLog( "h4i" )
+         db.commit()
+         
+         Me.DebugLog( "h5i" )
+         Me.Output({
+            "status"   : "SUBMITTED",
+            "editcode" : editcode
+         })
       else:
+         Me.DebugLog( "h6i", response )
          Me.Abort()
 
 #//////////////////////////////////////////////////////////////////////////////

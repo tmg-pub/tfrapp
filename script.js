@@ -1,11 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // TFRAPP by Potter-MoonGuard (c) 2020
-console.log( "Hello happy developer! :)" );
+console.log( "Hello happy developer. :)" );
 console.log( "This happy code brought to you by Potter-MoonGuard." );
 console.log( "Minifying is for nerds." );
 
-var g_config;
-var g_buttons_enabled = true;
+let g_config = {};
+let g_buttons_enabled = true;
 ///////////////////////////////////////////////////////////////////////////////
 
 //-----------------------------------------------------------------------------
@@ -146,6 +146,7 @@ function AddContentTextPrompt( index, prompt_html ) {
    );
    var textarea = $( `<textarea type="text" value="" rows="1" class="form_input" id="form_input${index}" data-part="${index}"></textarea>` );
    LoadFieldsave( textarea, prompt_html );
+   textarea.val( "hello" );
    $("#content_shell").append( textarea );
 }
 
@@ -181,7 +182,7 @@ function ShowApplication() {
    // Populate the page with the application parts.
    for( var i = 0; i < form_parts.length; i++ ) {
       var part = form_parts[i];
-      if( part.type == "header" ) {
+      if( part.type == "section" ) {
          AddContentHeader( part.title, part.description );
       } else if( part.type == "text" ) {
          AddContentTextPrompt( i, part.prompt );
@@ -249,10 +250,10 @@ function ShowApplication() {
       console.log( "Submitting application to server." );
       ShowLoading();
       $.post({
-         url: "submit.py",
-         contentType: "application/json; charset=UTF-8",
-         data: JSON.stringify(post),
-         dataType: "json"
+         url         : "submit.py",
+         contentType : "application/json; charset=UTF-8",
+         data        : JSON.stringify(post),
+         dataType    : "json"
       }).done( data => {
          // Save submission code.
          console.log( "Got OK response." );
@@ -260,7 +261,7 @@ function ShowApplication() {
          if( data.status == 'SUBMITTED' ) {
             console.log( "Submitted successfully." );
             localStorage.setItem( "editcode", data.editcode );
-            localStorage.setItem( "post", "" );
+            localStorage.setItem( "appstatus", "" );
             ShowCompleted( true );
          } else {
             on_failure();
@@ -300,16 +301,20 @@ function CheckApp() {
       data: JSON.stringify(post),
       dataType: "json"
    }).done( data => {
+      console.log(data);
       if( data.status == "OK" ) {
          if( data.editable ) {
             // If the server tells us that we can edit the app, we add the
             //  button.
             AddButton( "Edit App" ).click( EditAppButton );
-            if( data.post ) {
-               // Officer comments are also stored in this response.
-               localStorage.setItem( "officer_comments", data.post );
-               UpdateOfficerComments();
-            }
+         }
+         if( data.appstatus ) {
+            // Officer comments are also stored in this response.
+            localStorage.setItem( "appstatus", data.appstatus );
+            UpdateOfficerComments();
+         } else {
+            localStorage.setItem( "appstatus", "" );
+            UpdateOfficerComments();
          }
       } else {
       
@@ -335,7 +340,7 @@ function ResetButton() {
    // Ugly confirm box. Prettify in the future?
    if( confirm( "Are you sure?" )) {
       localStorage.clear();
-      LoadNormal();
+      ShowNormal();
    }
 }
 
@@ -343,15 +348,15 @@ function ResetButton() {
 // When the Edit App button is pressed.
 function EditAppButton() {
    if( !g_buttons_enabled ) return;
-   LoadNormal();
+   ShowNormal();
 }
 
 //-----------------------------------------------------------------------------
 // Update the officer comments div on the page from local storage.
 function UpdateOfficerComments() {
    $("#officer_comments").html(
-      localStorage.getItem( "officer_comments" )
-      || "No comments have been made on your application."
+      localStorage.getItem( "appstatus" )
+      || "Your application is under review."
    );
 }
 
@@ -361,7 +366,7 @@ function ShowCompleted( isnew ) {
    console.log( "Showing completion page." )
    HideLoading();
    ResetContent();
-   AddCloserText( localStorage.getItem( "closer_text" ));
+   AddCloserText( g_config.closer )
    
    if( !isnew ) {
       CheckApp();
@@ -374,7 +379,7 @@ function ShowCompleted( isnew ) {
    }
    
    // Add the officer comments section.
-   $("#content_shell").append( $(`<h2>Officer Comments</h2>`) );
+   $("#content_shell").append( $(`<h2>Application Status</h2>`) );
    $("#content_shell").append( $(`<p id="officer_comments"></p>`) );
    UpdateOfficerComments();
    
@@ -384,41 +389,129 @@ function ShowCompleted( isnew ) {
 
 //-----------------------------------------------------------------------------
 // Load the normal entry page.
-function LoadNormal() {
-   ShowLoading();
+function ShowNormal() {
    
-   // We fetch the configuration from the server, and then go from there.
-   $.get( "getconfig.py" ).done( data => {
-      HideLoading();
-      g_config = data;
+   HideLoading();
+   ShowApplication();
+   
+   // Fade in.
+   $("#content").removeClass( "hide" )
+   $("#buttons").removeClass( "hide" )
       
-      // Closer text from this response is saved in the cache for the
-      //  completion page. It's not loaded later for the completion page, as
-      //  the cache needs to be valid for that page (must contain an editcode).
-      localStorage.setItem( "closer_text", g_config.closer_text );
-      ShowApplication();
-      
-      // Fade in.
-      $("#content").removeClass( "hide" )
-      $("#buttons").removeClass( "hide" )
-      
-      addAutoResize();
-   }).fail( ( error ) => {
-      HideLoading();
-      console.log( error );
-      Notify( "The server is experiencing problems. Please try again later.",
-              "#c40000", "#fff" );
-      return;
-   });
+   addAutoResize();
+   
 }
 
-//-----------------------------------------------------------------------------
-// Application entry point. "ready" event.
-$( () => {
+function ParseApp( source ) {
+   
+   // Remove comments.
+   source = source.replace( /^#.*$\r?\n?/gm, "" )
+   
+   var lines = source.split( /\r?\n/ );
+   var source_index = 0;
+   function fetch() {
+      // Will return "" when past the end of the list.
+      return lines[source_index++] || "";
+   }
+   
+   function unfetch() {
+      source_index--;
+   }
+   
+   function eof() {
+      return source_index >= lines.length;
+   }
+   
+   var parts  = [];
+   var closer = "";
+   
+   function addPart( args, lines ) {
+      var type = args[0].toUpperCase();
+      var key  = args[1];
+      args.splice( 0, 2 );
+      args = args.map( x => x.toUpperCase() );
+      function hasArg( key ) {
+         return args.indexOf(key) > -1;
+      }
+      
+      var part = {
+         key: key
+      }
+      
+      if( type == "SECTION" ) {
+         part.type = "section";
+         part.title = lines[0];
+         lines.shift();
+         part.description = lines.join( "\n" ).trim();
+         parts.push( part );
+      } else if( type == "TEXT" ) {
+         part.type = "text";
+         part.prompt = lines.join( "\n" ).trim();
+         if( hasArg( "OPTIONAL" )) {
+            part.optional = true;
+         }
+         parts.push( part );
+      } else if( type == "CLOSER" ) {
+         g_config.closer = lines.join( "\n" ).trim();
+      }
+   }
+   
+   var part_regex = /^\s*\[(.+)\]\s*$/;
+   
+   while( !eof() ) {
+      var line = fetch();
+      var match = line.match( part_regex );
+      if( match ) {
+         var args = match[1].split(' ');
+         
+         var lines2 = [];
+         
+         while( !eof() ) {
+            var line2 = fetch();
+            if( line2.match( part_regex )) {
+               unfetch();
+               break;
+            } else {
+               lines2.push( line2 );
+            }
+         }
+         addPart( args, lines2 );
+      }
+   }
+   
+   g_config.parts = parts;
+}
+
+async function Start() {
+   
+   // Parse the window location and check for an app shortcut ID.
+   console.log( window.location );
+   let loc = window.location.pathname
+   editcode_shortcut = loc.match( /\/([a-zA-Z0-9]{5})$/ );
+   if( editcode_shortcut ) {
+      // todo: set to upper
+      response = await $.get({
+         url : "getapp.py?code=" + editcode_shortcut[1],
+         dataType: "json"
+      });
+
+      console.log( response );
+   }
+   
    // Setup the notify box's dismiss trigger.
-   $("#notify_box").click( () => {
+   $("#notify_box").click( e => {
       HideNotify();
-   })
+   });
+   
+   ShowLoading();
+   
+   appdata = await $.get( "app.txt" );
+   ParseApp( appdata );
+   if( localStorage.getItem( "editcode" )) {
+      ShowCompleted();
+   } else {
+      ShowNormal();
+   }
    
    // The editcode is what we use to keep track of our application submission,
    //  generated from the server and returned in the response from the submit
@@ -426,12 +519,19 @@ $( () => {
    //  instead of creating a new one.
    // If we have an editcode, start with the completion page instead of the
    //  normal page.
+   /* 
    if( localStorage.getItem( "editcode" )) {
       ShowCompleted();
    } else {
       ShowLoading();
       LoadNormal();
-   }
+   }*/
+}
+
+//-----------------------------------------------------------------------------
+// Application entry point. "ready" event.
+$( () => {
+   Start();
 })
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -15,8 +15,8 @@
 # [TEXT <KEY>] adds a text field. This is the only kind of field supported
 # currently. <KEY> is a unique one-word identifier.
 # [TEXT <KEY> OPTIONAL] makes an optional field.
-# 
 #------------------------------------------------------------------------------
+
 [SECTION IC_SECTION]
 Stormwind Army Enlistment Form
 Please fill out the following below as accurately as possible in complete
@@ -112,12 +112,12 @@ Regiment before, what were the circumstances of you leaving?
 
 [TEXT GUILD_RULES_AGREEMENT]
 Have you read our
-<a href="https://the-first-regiment.fandom.com/wiki/Guild_Rules">Guild Rules</a>?
+<a href="https://the-first-regiment.fandom.com/wiki/Guild_Rules" target="_blank">Guild Rules</a>?
 And will you abide by them?
 
 [TEXT SERVICE_RECORD_AGREEMENT]
 Have you read our
-<a href="https://the-first-regiment.fandom.com/wiki/Service_Record">Service Record</a>
+<a href="https://the-first-regiment.fandom.com/wiki/Service_Record" target="_blank">Service Record</a>
 page? It gives an idea of what you can expect to positively and negatively
 affect your character progression.
 
@@ -182,7 +182,7 @@ A soldier is being reprimanded and will face severe punishment for something
 that was <b>your</b> fault, but everyone, including the soldier, does not know
 that. You do not know the soldier. What do you do?
 
-[AFTER SUBMISSION]
+[CLOSER]
 <h2>Submitted</h2>
 Your application has been recorded.<br>
 <br>
