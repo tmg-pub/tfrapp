@@ -15,6 +15,9 @@ form_config_docid: "QSB2ZXJ5IGFwdGx5IG5hbWVkIGRvY3VtZW50IElELi4u"
 # ID of the Google Drive folder where applications will be stored.
 apps_folder: "QnJlYWtmYXN0IGlzIHRoZSBtb3N0IGltc"
 
+# Used in the application generation to create links.
+site_url: "thetestiment.com/app"
+
 # SQL database access information.
 sql:
    host     : "mysql.minecraft.net"

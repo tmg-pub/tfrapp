@@ -5,11 +5,14 @@
 var NOW = new Date();
 
 //-----------------------------------------------------------------------------
+// This is a typical response template. Fill it in with whatever data for an OK
+//  response and then return it.
 var RESPONSE_OK = {
   "status": "OK",
 }
 
 //-----------------------------------------------------------------------------
+// Response value when they give a bad edit code.
 var ERROR_CANNOT_EDIT = {
   "status": "ERROR",
   "error" : "CANNOT_EDIT",
@@ -17,6 +20,7 @@ var ERROR_CANNOT_EDIT = {
 }
 
 //-----------------------------------------------------------------------------
+// Response value when something goes wrong with the document loading.
 var ERROR_CANNOT_OPEN = {
   "status": "ERROR",
   "error" : "CANNOT_OPEN",
@@ -24,12 +28,15 @@ var ERROR_CANNOT_OPEN = {
 }
 
 //-----------------------------------------------------------------------------
+// Typical response error value. Don't need to be too verbose with errors,
+//  giving more info for bad input means helping out exploiters.
 var ERROR_BAD_REQUEST = {
   "status" : "ERROR",
   "error"  : "Bad Request"
 }
 
 //-----------------------------------------------------------------------------
+// Returns a long timestamp for central time.
 function fullTimestamp() {
   return Utilities.formatDate( NOW, "America/Chicago", "EEEE, MMMM d, yyyy  HH:mm a 'CT'" )
 }
@@ -38,6 +45,8 @@ function fullTimestamp() {
 var FIELD_REGEX = /^\s*([^:]+):\s*(.*?)\s*$/mi;
 
 //-----------------------------------------------------------------------------
+// Returns an element that holds a header field (at the top of the document).
+// If an existing element doesn't exist for a field, then one will be inserted.
 function getHeaderElement( document, field, insert ) {
   var regex = FIELD_REGEX( field );
   var body = document.getBody();
@@ -67,6 +76,7 @@ function getHeaderElement( document, field, insert ) {
 }
 
 //-----------------------------------------------------------------------------
+// Reads a field at the top of the document.
 function getHeaderField( document, field ) {
   var para = getHeaderElement( document, field );
   if( !para ) return null;
@@ -75,6 +85,8 @@ function getHeaderField( document, field ) {
 }
 
 //-----------------------------------------------------------------------------
+// Sets a field at the top of the document. If the field doesn't exist, it will
+//  be inserted.
 function setHeaderField( document, field ) {
   var para = getHeaderElement( document, field, true );
   para.clear();
@@ -84,6 +96,24 @@ function setHeaderField( document, field ) {
 }
 
 //-----------------------------------------------------------------------------
+// Returns the child index of one of the section headers. Headers are made
+//  with HEADING3 style. These are not related to the document headers, above.
+function findHeaderIndex( document, title ) {
+  title = title.toUpperCase();
+  var body = document.getBody();
+  for( var range = null; range = body.findElement( DocumentApp.ElementType.PARAGRAPH, range ); ) {
+    var para = range.getElement().asParagraph();
+    if( para.getHeading() == DocumentApp.ParagraphHeading.HEADING3
+        && para.getText().trim().toUpperCase() == title ) {
+      return body.getChildIndex( para );
+    }
+  }
+  return null;
+}
+
+//-----------------------------------------------------------------------------
+// Erases all of the CONTENTS part of an application, to make way for an
+//  update.
 function resetApplicationContents( document ) {
   Logger.log( "Resetting application contents." )
   var body = document.getBody();
@@ -104,6 +134,8 @@ function resetApplicationContents( document ) {
 }
 
 //-----------------------------------------------------------------------------
+// Strip HTML tags and do some basic formatting hacks to prettify an
+//  application prompt or description.
 function stripPromptFormat( prompt ) {
   prompt = prompt.replace( /\n/g, " " );
   prompt = prompt.replace( /  /g, " " );
@@ -113,6 +145,8 @@ function stripPromptFormat( prompt ) {
 }
 
 //-----------------------------------------------------------------------------
+// Insert application contents from the request into the document at the
+//  specified child index.
 function insertApplicationContents( document, index, app ) {
   Logger.log( "Inserting new application contents." )
   
@@ -148,27 +182,16 @@ function insertApplicationContents( document, index, app ) {
   body.insertHorizontalRule( index++ );
 }
 
-function findHeaderIndex( document, title ) {
-  title = title.toUpperCase();
-  var body = document.getBody();
-  for( var range = null; range = body.findElement( DocumentApp.ElementType.PARAGRAPH, range ); ) {
-    var para = range.getElement().asParagraph();
-    if( para.getHeading() == DocumentApp.ParagraphHeading.HEADING3 && para.getText().trim().toUpperCase() == title ) {
-      return body.getChildIndex( para );
-    }
-  }
-  return null;
-}
-
 //-----------------------------------------------------------------------------
-function getApplicationStatusSection( document ) {
-  Logger.log( "Getting applicaton's STATUS section." );
+// Returns the child index of the element directly after the horizontal rule
+//  of the STATUS section (the rule marks the start of the content).
+function getAppStatusStartIndex( document ) {
   var body = document.getBody();
   var index = findHeaderIndex( document, "STATUS" );
-  if( !index ) return "";
-  var html = "";
+  if( !index ) return null;
   var started = false;
-  
+  // Search for the horizontal rule that starts the visible part.
+  // Horizontal rule is also considered a paragraph.
   index++;
   for( ; index < body.getNumChildren(); index++ ) {
     var child = body.getChild(index);
@@ -181,10 +204,25 @@ function getApplicationStatusSection( document ) {
     }
   }
   
-  if( !started ) {
-    Logger.log( "  Didn't find divider." );
+  if( !started ) return null;
+  
+  return index + 1;
+}
+
+//-----------------------------------------------------------------------------
+// Reads the STATUS section of a document and convert it to HTML to send to the
+//  user.
+function getAppStatus( document ) {
+  Logger.log( "Getting applicaton's STATUS section." );
+  var body = document.getBody();
+  var index = getAppStatusStartIndex( document );
+  if( !index ) {
+    Logger.log( "Didn't find STATUS section content." );
     return "";
   }
+  var html = "";
+  // TODO: beter content trimming afterwards?
+  // Don't insert <br> until the end?
   
   index++;
   for( ; index < body.getNumChildren(); index++ ) {
@@ -226,7 +264,6 @@ function getApplicationStatusSection( document ) {
             html += str;
           }
         }
-        
       }
     }
   }
@@ -234,7 +271,10 @@ function getApplicationStatusSection( document ) {
   return html;
 }
 
-function readApplicationInput( document ) {
+//-----------------------------------------------------------------------------
+// Parses the CONTENTS section and builds a map of key values for each
+//  field in the application.
+function getAppInput( document ) {
   
   var body = document.getBody();
   var index = findHeaderIndex( document, "CONTENTS" );
@@ -251,8 +291,7 @@ function readApplicationInput( document ) {
       
       var fc = para.getForegroundColor();
       if( fc && fc == "#ffffff" ) {
-        Logger.log( "foundkey", para.getText() ) 
-        // Part key is hidden as white..
+        // Keys are hidden in white text.
         var part_key = para.getText();
         var part_text = "";
         index++;
@@ -278,7 +317,7 @@ function readApplicationInput( document ) {
 }
 
 //-----------------------------------------------------------------------------
-function resetApplication( document, editcode ) {
+function resetApplication( document, editcode, site_url ) {
   Logger.log( "Resetting document. Editcode %s", editcode )
   var body = document.getBody();
   body.clear();
@@ -311,6 +350,8 @@ function resetApplication( document, editcode ) {
   body.appendParagraph( "This section is for officers to write in." )
   .setHeading( DocumentApp.ParagraphHeading.NORMAL )
   .setFontSize( 9 ).setForegroundColor( "#999999" ).setItalic( true );
+  
+  // Space for them to feel comfy writing in.
   body.appendParagraph( "" )
   .setHeading( DocumentApp.ParagraphHeading.NORMAL )
   body.appendParagraph( "" );
@@ -330,7 +371,7 @@ function resetApplication( document, editcode ) {
   body.appendParagraph( "" );
   body.appendParagraph( "You should send a comprehensive letter ingame when you update their "
                        +"application status. If you need the applicant to make changes to their application, "
-                       +"include this link in the ingame mail: thefirstregiment.com/app/edit/" + editcode );
+                       +"include this link in the ingame mail: " + site_url + "/edit/" + editcode );
   
   body.appendHorizontalRule();
   body.appendParagraph( "" )
@@ -344,6 +385,35 @@ function resetApplication( document, editcode ) {
     writer.appendText( editcode ).setFontSize( 8 )
     writer.appendText( " (Erase this line to disable further edits from the applicant.)" )
     .setForegroundColor( "#AAAAAA" ).setFontSize( 8 );
+  }
+}
+
+//-----------------------------------------------------------------------------
+// Erase any text in the STATUS section. This is done whenever the user edits
+//  their application (sets it back to "under review").
+function resetAppStatus( document ) {
+  Logger.log( "Resetting application STATUS." );
+  var body  = document.getBody();
+  var index = getAppStatusStartIndex( document );
+  while( index < body.getNumChildren() ) {
+    
+    var child = body.getChild(index);
+    Logger.log( index );
+    Logger.log( child.getText() );
+    
+    if( child.getType() == DocumentApp.ElementType.PARAGRAPH
+       && child.asParagraph().getHeading() == DocumentApp.ParagraphHeading.HEADING3 ) {
+      // Shouldn't be another section, but maybe there might be in the future.
+      break;
+    }
+    
+    if( index == body.getNumChildren() - 1 ) {
+      // Cannot remove last child???
+      child.asParagraph().clear();
+      break;
+    } else {
+      body.removeChild( child );
+    }
   }
 }
 
@@ -370,6 +440,7 @@ function userCanEdit( document, apps_folder, user_editcode ) {
 }
 
 //-----------------------------------------------------------------------------
+// Searches through an app (from request) for the fieldname.
 function getAppField( app, fieldname ) {
   var parts = app.parts;
   Logger.log(app);
@@ -381,7 +452,7 @@ function getAppField( app, fieldname ) {
       return a
     }
   }
-  return null;
+  return "";
 }
 
 //-----------------------------------------------------------------------------
@@ -402,15 +473,32 @@ function broadcastToDiscord( title, document, webhooks, app, updating ) {
     }]
   };
   
+  var desc = "";
+  
   if( updating ) {
     data.embeds[0].author.name = "Application Updated";
-    data.embeds[0].description = "An application has been updated.";
-    data.embeds[0].color = 15524734;
+    desc += "*An application has been updated and needs review.*\n\n"
+    desc += "**Character**\n"     + getAppField( app, "OOC_NAME"           ) + "\n\n"
+          + "**Discord**\n"       + getAppField( app, "DISCORD"            ) + "\n\n";
+    data.embeds[0].color = 15524734; // westfall yellow
   } else {
     data.embeds[0].author.name = "New Application";
-    data.embeds[0].description = "A new application has been submitted.";
-    data.embeds[0].color = 5102410;
+    desc += "*A new application has been submitted and needs review.*\n\n"
+    desc += "**Fields of Interest:**\n"   + getAppField( app, "FIELDS_OF_INTEREST"    ) + "\n\n"
+          + "**Character**\n"             + getAppField( app, "OOC_NAME"              ) + "\n\n"
+          + "**Discord**\n"               + getAppField( app, "DISCORD"               ) + "\n\n"
+          + "**RP Experience**\n"         + getAppField( app, "RP_EXPERIENCE"         ) + "\n\n"
+          + "**Referral**\n"              + getAppField( app, "REFERRAL"              ) + "\n\n"
+          + "**Character Description**\n" + getAppField( app, "CHARACTER_DESCRIPTION" ) + "\n\n";
+          
+    data.embeds[0].color = 5102410; // fel green
   }
+  
+  if( desc.length > 1500 ) {
+    desc = desc.substring( 0, 1500 ) + "...";
+  }
+  
+  data.embeds[0].description = desc;
   
   var options = {
     method: "post",
@@ -520,7 +608,7 @@ function API_SubmitApplication( event ) {
     document = DocumentApp.openById( doc_file.getId() );
     doc_file.setSharing( DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW );
     // TODO: Set owner too.
-    resetApplication( document, event.editcode );
+    resetApplication( document, event.editcode, event.site_url );
   }
   
   Logger.log( "Document ID is: %s", document.getId() );
@@ -528,8 +616,10 @@ function API_SubmitApplication( event ) {
   insertApplicationContents( document, index_for_contents, event.app );
   
   if( updating ) {
+    // When updating, set the update time and erase old status.
     Logger.log( "Setting document updated field." );
     setHeaderField( document, "Date updated" ).appendText( fullTimestamp() );
+    resetAppStatus( document );
   }
   
   broadcastToDiscord( title, document, event.discord, event.app, updating );
@@ -557,13 +647,15 @@ function API_Check( event ) {
   }
   
   RESPONSE_OK.editable  = userCanEdit( document, event.apps_folder, event.editcode );
-  RESPONSE_OK.appstatus = getApplicationStatusSection( document );
-  RESPONSE_OK.input     = readApplicationInput( document );
+  RESPONSE_OK.appstatus = getAppStatus( document );
+  RESPONSE_OK.input     = getAppInput( document );
   Logger.log(RESPONSE_OK.appstatus);
   return RESPONSE_OK;
 }
 
 function test() {
-  document = DocumentApp.openById( "1kP1cbTFfqwy2agPd4pRQkNmUmYQO455C6Xux1_7X_BM" );
-  Logger.log( readApplicationInput( document ) );
+  document = DocumentApp.openById( "17kctBHvrzSU-CcVZdW09OjKvg07mhN1f--TDMdOyx5M" );
+  Logger.log( getAppInput( document ) );
+  //resetApplication( document );
+  resetAppStatus( document );
 }
