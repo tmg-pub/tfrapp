@@ -105,7 +105,10 @@ function resetApplicationContents( document ) {
 
 //-----------------------------------------------------------------------------
 function stripPromptFormat( prompt ) {
-  prompt = prompt.replace( /<li>/g, "• " );
+  prompt = prompt.replace( /\n/g, " " );
+  prompt = prompt.replace( /  /g, " " );
+  prompt = prompt.replace( /<br>/g, "\n" );
+  prompt = prompt.replace( /<li>/g, "\n• " );
   return prompt.replace( /<[^>]*>/g, "" );
 }
 
@@ -122,11 +125,11 @@ function insertApplicationContents( document, index, app ) {
   
   for( var i in app.parts ) {
     var part = app.parts[i];
-    if( part.type == "header" ) {
+    if( part.type == "section" ) {
       body.insertParagraph( index++, part.title )
       .setHeading( DocumentApp.ParagraphHeading.NORMAL )
       .setFontSize( 14 ).setBold(true);
-      body.insertParagraph( index++, part.description )
+      body.insertParagraph( index++, stripPromptFormat(part.description) )
       .setHeading( DocumentApp.ParagraphHeading.NORMAL )
       .setFontSize( 11 ).setItalic(true);
       body.insertParagraph( index++, "" )
@@ -136,13 +139,11 @@ function insertApplicationContents( document, index, app ) {
       body.insertParagraph( index++, prompt )
       .setHeading( DocumentApp.ParagraphHeading.NORMAL )
       .setForegroundColor( "#666666" ).setBold( true );
-      body.insertParagraph( index++, "" )
+      body.insertParagraph( index++, part.key ).setForegroundColor( "#FFFFFF" );
       body.insertParagraph( index++, part.val )
-      .setHeading( DocumentApp.ParagraphHeading.NORMAL )
-      body.insertParagraph( index++, "" )
-      
+      .setHeading( DocumentApp.ParagraphHeading.NORMAL );
+      body.insertParagraph( index++, "" );
     }
-    
   }
   body.insertHorizontalRule( index++ );
 }
@@ -160,10 +161,10 @@ function findHeaderIndex( document, title ) {
 }
 
 //-----------------------------------------------------------------------------
-function getApplicationPostSection( document ) {
-  Logger.log( "Getting applicaton's POST section." );
+function getApplicationStatusSection( document ) {
+  Logger.log( "Getting applicaton's STATUS section." );
   var body = document.getBody();
-  var index = findHeaderIndex( document, "POST" );
+  var index = findHeaderIndex( document, "STATUS" );
   if( !index ) return "";
   var html = "";
   var started = false;
@@ -233,6 +234,49 @@ function getApplicationPostSection( document ) {
   return html;
 }
 
+function readApplicationInput( document ) {
+  
+  var body = document.getBody();
+  var index = findHeaderIndex( document, "CONTENTS" );
+  if( !index ) return [];
+  index++;
+  
+  var parts = {};
+  for( ; index < body.getNumChildren(); index++ ) {
+    var child = body.getChild(index);
+    Logger.log( child.getText() );
+    if( child.getType() == DocumentApp.ElementType.PARAGRAPH ) {
+      var para = child.asParagraph();
+      if( para.getHeading() == DocumentApp.ParagraphHeading.HEADING3 ) break; // Start of next section.
+      
+      var fc = para.getForegroundColor();
+      if( fc && fc == "#ffffff" ) {
+        Logger.log( "foundkey", para.getText() ) 
+        // Part key is hidden as white..
+        var part_key = para.getText();
+        var part_text = "";
+        index++;
+        // Scan to next
+        var text = "";
+        while( index < body.getNumChildren() ) {
+          var child2 = body.getChild(index);
+          if( child2.getType() == DocumentApp.ElementType.PARAGRAPH ) {
+            var para2 = child2.asParagraph();
+            
+            if( (para2.getHeading() == DocumentApp.ParagraphHeading.HEADING3)
+                || para2.isBold() ) { index--; break; } // Start of next section or next prompt.
+            
+            part_text += para2.getText();
+            index++;
+          }
+        }
+        parts[part_key] = part_text;
+      }
+    }
+  }
+  return parts;
+}
+
 //-----------------------------------------------------------------------------
 function resetApplication( document, editcode ) {
   Logger.log( "Resetting document. Editcode %s", editcode )
@@ -274,14 +318,19 @@ function resetApplication( document, editcode ) {
   body.appendParagraph( "" );
   body.appendParagraph( "" );
   
-  body.appendParagraph( "POST" ).setHeading( DocumentApp.ParagraphHeading.HEADING3 ).setBold( true );
+  body.appendParagraph( "STATUS" ).setHeading( DocumentApp.ParagraphHeading.HEADING3 ).setBold( true );
   body.appendParagraph( 
     "Text written below this line is viewable by the applicant on the submission "
-    +"page. Due to the nature of an accountless setup, this should not be treated "
-    +"as a reliable medium – if the user clears their browser cache, they will not "
-    +"be able to view it." )
+    +"page. It should be BRIEF and reflect the status of their application, examples:" )
   .setHeading( DocumentApp.ParagraphHeading.NORMAL )
   .setFontSize( 9 ).setForegroundColor( "#999999" ).setItalic( true );
+  body.appendParagraph( "\"Your application has been accepted. Please contact an officer for an interview.\"" );
+  body.appendParagraph( "\"Your application has been rejected. (And give reasoning.)\"" );
+  body.appendParagraph( "\"Your application needs changes. Please (edit and update what's wrong).\"" );
+  body.appendParagraph( "" );
+  body.appendParagraph( "You should send a comprehensive letter ingame when you update their "
+                       +"application status. If you need the applicant to make changes to their application, "
+                       +"include this link in the ingame mail: thefirstregiment.com/app/edit/" + editcode );
   
   body.appendHorizontalRule();
   body.appendParagraph( "" )
@@ -320,17 +369,73 @@ function userCanEdit( document, apps_folder, user_editcode ) {
   return false;
 }
 
-function documentTitleFromApp( app ) {
+//-----------------------------------------------------------------------------
+function getAppField( app, fieldname ) {
   var parts = app.parts;
+  Logger.log(app);
   for( var i in parts ) {
-    if( parts[i].primary ) {
+    if( parts[i].key == fieldname ) {
       var a = parts[i].val || "";
       a = a.trim();
       if( a.length == 0 ) break;
-      return "APP: " + a
+      return a
     }
   }
   return null;
+}
+
+//-----------------------------------------------------------------------------
+// Broadcast to Discord that an application was created or updated.
+// `title` is the title to use in the embed.
+// `document` is the main Document instance.
+// `webhooks` is the discord field from the request body.
+// `app` is the app field from the request body.
+// `updating` is true if this is an update and not a new application.
+function broadcastToDiscord( title, document, webhooks, app, updating ) {
+  Logger.log( "Broadcasting to Discord!" );
+  var data = {
+    content: "",
+    embeds: [{
+      author: {},
+      title: title,
+      url: document.getUrl(),
+    }]
+  };
+  
+  if( updating ) {
+    data.embeds[0].author.name = "Application Updated";
+    data.embeds[0].description = "An application has been updated.";
+    data.embeds[0].color = 15524734;
+  } else {
+    data.embeds[0].author.name = "New Application";
+    data.embeds[0].description = "A new application has been submitted.";
+    data.embeds[0].color = 5102410;
+  }
+  
+  var options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify( data )
+  };
+  
+  for( var i in webhooks ) {
+    Logger.log( "Sending to webhook " + i );
+    var webhook = webhooks[i].url
+    // wait=true in the querystring will cause the request to wait for confirmation.
+    // If it fails, then send an emergency email about it.
+    var response = UrlFetchApp.fetch( webhook + "?wait=true", options );
+    if( response.getResponseCode() != 200 ) {
+      message = 
+        "Generated from TFR APPS script.\n"
+      + "Application title: " + title + "\n"
+      + "Updating: " + updating ? "Yes\n" : "No\n"
+      + "Last part of Discord webhook: " + webhook.substring( webhook.length - 16 );
+      
+      MailApp.sendEmail( "tmg@clubtammy.info",
+                        "Discord webhook failed when posting TFR app!",
+                        message );
+    }
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -341,37 +446,48 @@ function documentTitleFromApp( app ) {
 //           one stored in the document, and if the document is present in the
 //           base applications folder.
 //   editcode: The editcode to check in the document, or the editcode to write
-//              into a new document. In other words, this is originally
-//              generated by the user, not this script.
+//              into a new document. In other words, this is generated by the
+//              front server, not this script.
 //   app: The user's application contents.
 //   {
 //     parts: The parts of the application. The entries are indexed by an
-//             incrementing integer, and may be in the following formats:
+//             incrementing integer (ordered as they should appear), and may
+//             be in the following formats:
 //             {
-//                type: "header" - This is a section header.
-//                title: The title caption of the section.
-//                description: The text that follows underneath.
+//                type: The type of this part, may be "section" or "text".
+//                key: The internal name of this part.
+//                for "section":
+//                  title: The title caption of the section.
+//                  description: The text that follows underneath.
+//                for "text":
+//                  prompt: The question presented to the user.
+//                  val: The input they gave for this field.
 //             }
-//             {
-//                type: "text" - This is a text input.
-//                prompt: The question presented to the user.
-//                primary: If true, this is the "primary" text field, the one
-//                         where the document title is grabbed from.
-//             }
-//     input: The user's input. The keys for this match the ones in parts for
-//            any fields that accept input. "header" parts will not have a
-//            corresponding input part.
+//   }
+//   apps_folder: This must contain the drive folder ID to store new
+//                applications in. Applications must also be present in this
+//                folder to be considered "editable".
+//   discord: A list of discord webhook information to broadcast updates to.
+//   {
+//      url: Webhook API url.
 //   }
 // }
 function API_SubmitApplication( event ) {
 
   // Don't forget sanitization!
-  Logger.log( event.app.parts[1].val );
   Logger.log( "New application being submitted." );
   Logger.log( "Document ID: %s", event.docid );
   Logger.log( "Editcode: %s", event.editcode );
   var document;
   var updating = false;
+  var title = getAppField( event.app, "NAME" );
+  if( !title ) {
+    Logger.log( "User didn't submit name." )
+    return ERROR_BAD_REQUEST;
+  }
+  
+  if( !event.apps_folder ) return ERROR_BAD_REQUEST;
+  
   if( event.docid ) {
     try {
       document = DocumentApp.openById( event.docid );
@@ -388,18 +504,14 @@ function API_SubmitApplication( event ) {
     }
     
     Logger.log( "Going to edit document." );
+    document.setName( "[APP] " + title );
     updating = true;
   } else {
     // Create a new document.
     Logger.log( "Creating new document." );
     var folder = DriveApp.getFolderById( event.apps_folder )
     
-    var title = documentTitleFromApp( event.app );
-    if( !title ) {
-      Logger.log( "User didn't submit name." )
-      return ERROR_BAD_REQUEST;
-    }
-    document = DocumentApp.create( title );
+    document = DocumentApp.create( "[APP] " + title );
     
     var doc_file = DriveApp.getFileById( document.getId() )
     var parent_folder = doc_file.getParents().next();
@@ -419,6 +531,8 @@ function API_SubmitApplication( event ) {
     Logger.log( "Setting document updated field." );
     setHeaderField( document, "Date updated" ).appendText( fullTimestamp() );
   }
+  
+  broadcastToDiscord( title, document, event.discord, event.app, updating );
   
   Logger.log( "Responding to caller." );
   RESPONSE_OK.docid = document.getId();
@@ -442,48 +556,14 @@ function API_Check( event ) {
     return ERROR_CANNOT_OPEN;
   }
   
-  RESPONSE_OK.editable = userCanEdit( document, event.apps_folder, event.editcode );
-  RESPONSE_OK.post = getApplicationPostSection( document );
-  Logger.log(RESPONSE_OK.post);
+  RESPONSE_OK.editable  = userCanEdit( document, event.apps_folder, event.editcode );
+  RESPONSE_OK.appstatus = getApplicationStatusSection( document );
+  RESPONSE_OK.input     = readApplicationInput( document );
+  Logger.log(RESPONSE_OK.appstatus);
   return RESPONSE_OK;
 }
 
-
-function test1( event ) {
-  Logger.log( event.app[0] );
-}
-
-//---------------------------------------------------------------------
 function test() {
-  //API_SubmitApplication( JSON.parse(SAMPLE) )
-  Logger.log( { "1": "test1", "2": "test2" } );
-  return;
-  
-  API_Check( {
-    docid: "xxx",
-    editcode: "xxx"
-  });
-  
-  return;
-  var document = DocumentApp.openById( "xxx" );
-  //resetApplication( document, 2350 );
-  var index = resetApplicationContents( document );
-  document.getBody().insertParagraph( index++, "Text here may be erased if the applicant updates their submission. Do not write here." )
-  .setHeading(DocumentApp.ParagraphHeading.NORMAL)
-  .setFontSize( 9 ).setForegroundColor( "#999999" ).setItalic( true );
-  
-  
-  /*
-  //Logger.log( getDetailsField( document, "Date created" ))
-  Logger.log( getHeaderField( document, "Date created" ));
-  var timestamp = fullTimestamp();
-  
-  var writer = setHeaderField( document, "Date updated" );
-  .appendText( timestamp );
-  
-  var writer = setHeaderField( document, "Edit code" );
-  writer.appendText( "03252808235 " );
-  writer.appendText( "(Delete this line to disable further edits from the applicant.)" )
-  .setForegroundColor( "#AAAAAA" );*/
+  document = DocumentApp.openById( "1kP1cbTFfqwy2agPd4pRQkNmUmYQO455C6Xux1_7X_BM" );
+  Logger.log( readApplicationInput( document ) );
 }
-
