@@ -55,7 +55,7 @@ def Output( data ):
 #  input not being handled right.
 def GetRequestBody():
    stdin_data = sys.stdin.buffer.read()
-   return json.loads( stdin_data.decode("utf8" ))
+   return json.loads( stdin_data.decode("utf8") )
    
 #------------------------------------------------------------------------------
 # Load JSON from the file given. By default errors are ignored and None is
