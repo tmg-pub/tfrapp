@@ -261,7 +261,7 @@ function ShowApplication() {
             console.log( "Submitted successfully." );
             localStorage.setItem( "editcode", data.editcode );
             localStorage.setItem( "appstatus", "" );
-            ShowCompleted( true );
+            ShowCompleted( true, false );
          } else {
             on_failure();
          }
@@ -291,45 +291,55 @@ function ShowApplication() {
 //  information about the user's application. The rest of the page is loaded
 //  from the cache - the "closer text". The application configuration isn't
 //                                           loaded for the completion page.
-function CheckApp() {
+async function CheckApp( load_input ) {
    var post = {
       "editcode": localStorage.getItem( "editcode" )
    }
-   $.post({
-      url: "checkapp.py",
-      contentType: "application/json; charset=UTF-8",
-      data: JSON.stringify(post),
-      dataType: "json"
-   }).done( data => {
-      console.log(data);
+   
+   try {
+      var data = await $.post({
+         url: "checkapp.py",
+         contentType: "application/json; charset=UTF-8",
+         data: JSON.stringify(post),
+         dataType: "json"
+      });
+      
       if( data.status == "OK" ) {
+         console.log( "App check success." )
+         console.log( data );
          if( data.editable ) {
             // If the server tells us that we can edit the app, we add the
             //  button.
             AddButton( "Edit App" ).click( EditAppButton );
          }
+         
          if( data.appstatus ) {
             // Officer comments are also stored in this response.
             localStorage.setItem( "appstatus", data.appstatus );
             UpdateOfficerComments();
          } else {
+            console.log( "No status set." );
             localStorage.setItem( "appstatus", "" );
             UpdateOfficerComments();
          }
-      } else {
-      
+         
+         if( load_input && data.input ) {
+            console.log( "Copying input from server." );
+            for( var key in data.input ) {
+               UpdateFieldsave( key, data.input[key] );
+            }
+         }
       }
-   }).fail( () => {
-      // Don't need to do anything special. The user will retain the cached
-      //  data to display.
-   }).always( () => {
-      // Could move this elsewhere if we just add the EDIT APP button on the
-      //  left side somehow.
-      // For some reason it feels more natural to have the edit button on the
-      //  left.
-      AddButton( "Reset" ).click( ResetButton );
-      $("#buttons").removeClass( "hide" );
-   })
+   } catch( err ) {
+   }
+   
+   HideLoading();
+   // Could move this elsewhere if we just add the EDIT APP button on the
+   //  left side somehow.
+   // For some reason it feels more natural to have the edit button on the
+   //  left.
+   AddButton( "Reset" ).click( ResetButton );
+   $("#buttons").removeClass( "hide" );
 }
 
 //-----------------------------------------------------------------------------
@@ -362,15 +372,15 @@ function UpdateOfficerComments() {
 
 //-----------------------------------------------------------------------------
 // Shows the "submitted" page.
-function ShowCompleted( isnew ) {
+function ShowCompleted( isnew, load_input ) {
    console.log( "Showing completion page." )
-   HideLoading();
    ResetContent();
    AddCloserText( g_config.closer )
    
    if( !isnew ) {
-      CheckApp();
+      CheckApp( load_input );
    } else {
+      HideLoading();
       // `isnew` is false when they submit a new app. If it's new, there will
       //  be no comments and it should be editable.
       AddButton( "Edit App" ).click( EditAppButton );
@@ -399,10 +409,12 @@ function ShowNormal() {
    $("#buttons").removeClass( "hide" )
       
    addAutoResize();
-   
 }
 
-function ParseApp( source ) {
+//-----------------------------------------------------------------------------
+// Called during startup to read the application template file and configure
+//  the pages.
+function ParseAppConfiguration( source ) {
    
    // Remove comments.
    source = source.replace( /^#.*$\r?\n?/gm, "" )
@@ -484,48 +496,52 @@ function ParseApp( source ) {
 
 async function Start() {
    
+   // Setup the notify box's dismiss trigger.
+   $("#notify_box").click( e => {
+      HideNotify();
+   });
+   ShowLoading();
+   
+   // If this is set, then the local storage is rewritten with data from the
+   //  server upon checking an existing application. This is undesirable
+   //  if the user has made additional changes locally, so is only set when
+   //  they follow an edit link directly.
+   let load_input = false;
+   
    // Parse the window location and check for an app shortcut ID.
    console.log( window.location );
    let search = window.location.search
    editcode = search.match( /[?&]edit=([a-zA-Z0-9]+)/ );
    if( editcode ) {
+      load_input = true;
       editcode = editcode[1].toUpperCase();
-      // todo: set to upper
-      response = await $.post({
-         url : "getapp",
-         contentType: "application/json; charset=UTF-8",
-         data: JSON.stringify({
-            editcode: editcode
-         }),
-         dataType: "json"
-      });
+      localStorage.setItem( "editcode", editcode );
       
-      console.log( response );
-      
+      /*
       // Update our cache.
       localStorage.setItem( "editcode", editcode );
       let parts = response.parts;
       for( let i = 0; i < parts.length; i++ ) {
          if( parts[i].type == "section" ) continue;
          UpdateFieldsave( parts[i].key, parts[i].val );
-      }
-      search = search.replace( /[?&]edit=([a-zA-Z0-9]+)/, "" )
-      search = search.replace( /^[?&]/, "?" )
+      }*/
       
-      history.replaceState( null, "", window.location.origin + window.location.pathname + search );
+      // Remove the editcode from the query string. This is so that if they
+      //  press reload or whatever, they're not going to erase their editing
+      //  progress by refetching the old application input from the server.
+      search = search.replace( /[?&]edit=([a-zA-Z0-9]+)/, "" );
+      search = search.replace( /^[?&]/, "?" );
+      
+      let url = window.location.origin + window.location.pathname + search;
+      history.replaceState( null, "", url );
    }
    
-   // Setup the notify box's dismiss trigger.
-   $("#notify_box").click( e => {
-      HideNotify();
-   });
-   
-   ShowLoading();
-   
+   // This is the main application configuration file.
    appdata = await $.get( "app.txt" );
-   ParseApp( appdata );
+   ParseAppConfiguration( appdata );
+   
    if( localStorage.getItem( "editcode" )) {
-      ShowCompleted();
+      ShowCompleted( false, load_input );
    } else {
       ShowNormal();
    }
