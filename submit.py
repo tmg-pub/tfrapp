@@ -60,7 +60,6 @@ def main():
    else:
       if response["response"]["result"]["status"] == "OK":
          
-         Me.DebugLog( "h3i" )
          # Save a record in our database of everything so that the user can
          #  easily access it through the editcode.
          dbc.execute(
@@ -74,16 +73,13 @@ def main():
                "content": json.dumps( input["parts"] )
             }
          )
-         Me.DebugLog( "h4i" )
          db.commit()
          
-         Me.DebugLog( "h5i" )
          Me.Output({
             "status"   : "SUBMITTED",
             "editcode" : editcode
          })
       else:
-         Me.DebugLog( "h6i", response )
          Me.Abort()
 
 #//////////////////////////////////////////////////////////////////////////////
