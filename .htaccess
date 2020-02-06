@@ -9,7 +9,7 @@ RewriteRule .* - [E=TFRAPP_BASE_PATH:/tfrapp]
 # R = HTTP redirect (can change this to permanent/301 for production.
 # QSA = Append any other query string onto the redirected URL.
 # NC = Not case sensitive match.
-RewriteRule ^edit\/([a-z0-9]{5})$ %{ENV:TFRAPP_BASE_PATH}/?edit=$1 [L,R,QSA,NC]
+RewriteRule ^edit\/([a-z0-9]+)$ %{ENV:TFRAPP_BASE_PATH}/?edit=$1 [L,R,QSA,NC]
 
 # For simple filenames without extensions, suffix .py for python scripts.
 # END = This is final, don't run this script again before serving the new path.
