@@ -38,6 +38,7 @@ def main():
       "editcode"    : editcode,
       "apps_folder" : Me.config["apps_folder"],
       "discord"     : Me.config["discord_webhooks"],
+      "site_url"    : Me.config["site_url"],
       "app"         : {
          "parts": input["parts"]
       },
