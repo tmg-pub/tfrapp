@@ -315,12 +315,15 @@ async function CheckApp( load_input ) {
          
          if( data.appstatus ) {
             // Officer comments are also stored in this response.
-            localStorage.setItem( "appstatus", data.appstatus );
-            UpdateOfficerComments();
+            SetOfficerComments( data.appstatus );
          } else {
             console.log( "No status set." );
             localStorage.setItem( "appstatus", "" );
-            UpdateOfficerComments();
+            if( !data.editable ) {
+               SetOfficerComments( "Your application was closed. You may reset this form to submit another one." );
+            } else {
+               SetOfficerComments( "Your application is under review." );
+            }
          }
          
          if( load_input && data.input ) {
@@ -363,23 +366,25 @@ function EditAppButton() {
 
 //-----------------------------------------------------------------------------
 // Update the officer comments div on the page from local storage.
-function UpdateOfficerComments() {
-   $("#officer_comments").html(
-      localStorage.getItem( "appstatus" )
-      || "Your application is under review."
-   );
+function SetOfficerComments( html ) {
+   $("#officer_comments").html( html );
 }
 
 //-----------------------------------------------------------------------------
 // Shows the "submitted" page.
 function ShowCompleted( isnew, load_input ) {
-   console.log( "Showing completion page." )
+   console.log( "Showing completion page." );
    ResetContent();
-   AddCloserText( g_config.closer )
+   AddCloserText( g_config.closer );
+   
+   // Add the officer comments section.
+   $("#content_shell").append( $(`<h2>Application Status</h2>`) );
+   $("#content_shell").append( $(`<p id="officer_comments"><span style="color: rgba(0,0,0,0.25)">Checking...</span></p>`) );
    
    if( !isnew ) {
       CheckApp( load_input );
    } else {
+      SetOfficerComments( "Your application is under review" );
       HideLoading();
       // `isnew` is false when they submit a new app. If it's new, there will
       //  be no comments and it should be editable.
@@ -388,10 +393,6 @@ function ShowCompleted( isnew, load_input ) {
       $("#buttons").removeClass( "hide" );
    }
    
-   // Add the officer comments section.
-   $("#content_shell").append( $(`<h2>Application Status</h2>`) );
-   $("#content_shell").append( $(`<p id="officer_comments"></p>`) );
-   UpdateOfficerComments();
    
    // Fade in.
    $("#content").removeClass( "hide" );
