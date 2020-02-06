@@ -224,7 +224,6 @@ function getAppStatus( document ) {
   // TODO: beter content trimming afterwards?
   // Don't insert <br> until the end?
   
-  index++;
   for( ; index < body.getNumChildren(); index++ ) {
     var child = body.getChild(index);
     if( child.getType() == DocumentApp.ElementType.PARAGRAPH ) {
@@ -484,7 +483,7 @@ function broadcastToDiscord( title, document, webhooks, app, updating ) {
   } else {
     data.embeds[0].author.name = "New Application";
     desc += "*A new application has been submitted and needs review.*\n\n"
-    desc += "**Fields of Interest:**\n"   + getAppField( app, "FIELDS_OF_INTEREST"    ) + "\n\n"
+    desc += "**Fields of Interest**\n"    + getAppField( app, "FIELDS_OF_INTEREST"    ) + "\n\n"
           + "**Character**\n"             + getAppField( app, "OOC_NAME"              ) + "\n\n"
           + "**Discord**\n"               + getAppField( app, "DISCORD"               ) + "\n\n"
           + "**RP Experience**\n"         + getAppField( app, "RP_EXPERIENCE"         ) + "\n\n"
@@ -646,9 +645,15 @@ function API_Check( event ) {
     return ERROR_CANNOT_OPEN;
   }
   
-  RESPONSE_OK.editable  = userCanEdit( document, event.apps_folder, event.editcode );
+  var editable = userCanEdit( document, event.apps_folder, event.editcode );
+  RESPONSE_OK.editable  = editable;
   RESPONSE_OK.appstatus = getAppStatus( document );
-  RESPONSE_OK.input     = getAppInput( document );
+  
+  if( editable ) {
+    // This is only present for editable apps - the application contents.
+    RESPONSE_OK.input = getAppInput( document );
+  }
+  
   Logger.log(RESPONSE_OK.appstatus);
   return RESPONSE_OK;
 }
