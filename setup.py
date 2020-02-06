@@ -17,7 +17,7 @@ def BasicSetup():
    # docid: The ID of the generated Google document that the app is linked to.
    # updated: The time (posix) that we last updated the app. Can be used to
    #          expire old edit links so they can't build up.
-   # contents: Contents of their application, store in JSON.
+   # content: Contents of their application, store in JSON.
    dbc.execute( """
       CREATE TABLE IF NOT EXISTS Apps (
         editcode VARCHAR(16) PRIMARY KEY,
