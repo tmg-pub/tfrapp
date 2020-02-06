@@ -129,8 +129,8 @@ function LoadFieldsave( element, key ) {
 //-----------------------------------------------------------------------------
 // Save a form field to the cache. This is called when the user leaves focus
 //  of one of the form inputs.
-function UpdateFieldsave( element, key ) {
-   localStorage.setItem( "field:" + key, element.val() );
+function UpdateFieldsave( key, val ) {
+   localStorage.setItem( "field:" + key, val );
 }
 
 //-----------------------------------------------------------------------------
@@ -145,8 +145,7 @@ function AddContentTextPrompt( index, prompt_html ) {
       `<p class="prompt" id="form_prompt${index}" data-part="${index}">${prompt_html}</p>`
    );
    var textarea = $( `<textarea type="text" value="" rows="1" class="form_input" id="form_input${index}" data-part="${index}"></textarea>` );
-   LoadFieldsave( textarea, prompt_html );
-   textarea.val( "hello" );
+   LoadFieldsave( textarea, g_config.parts[index].key );
    $("#content_shell").append( textarea );
 }
 
@@ -276,14 +275,15 @@ function ShowApplication() {
    });
    
    // Register a handler to save updated fields to the local storage.
-   $(".form_input").change( event => {
+   $(".form_input").on( "change", event => {
       var element = $(event.target)
       var part = element.data( "part" )
       
       // We use the prompt text as the key. If the application is updated,
       //  then removed prompts will not be used.
-      UpdateFieldsave( element, form_parts[part].prompt );
-   })
+      UpdateFieldsave( form_parts[part].key, element.val() );
+   });
+   
 }
 
 //-----------------------------------------------------------------------------
@@ -486,16 +486,33 @@ async function Start() {
    
    // Parse the window location and check for an app shortcut ID.
    console.log( window.location );
-   let loc = window.location.pathname
-   editcode_shortcut = loc.match( /\/([a-zA-Z0-9]{5})$/ );
-   if( editcode_shortcut ) {
+   let search = window.location.search
+   editcode = search.match( /[?&]edit=([a-zA-Z0-9]+)/ );
+   if( editcode ) {
+      editcode = editcode[1].toUpperCase();
       // todo: set to upper
-      response = await $.get({
-         url : "getapp.py?code=" + editcode_shortcut[1],
+      response = await $.post({
+         url : "getapp",
+         contentType: "application/json; charset=UTF-8",
+         data: JSON.stringify({
+            editcode: editcode
+         }),
          dataType: "json"
       });
-
+      
       console.log( response );
+      
+      // Update our cache.
+      localStorage.setItem( "editcode", editcode );
+      let parts = response.parts;
+      for( let i = 0; i < parts.length; i++ ) {
+         if( parts[i].type == "section" ) continue;
+         UpdateFieldsave( parts[i].key, parts[i].val );
+      }
+      search = search.replace( /[?&]edit=([a-zA-Z0-9]+)/, "" )
+      search = search.replace( /^[?&]/, "?" )
+      
+      history.replaceState( null, "", window.location.origin + window.location.pathname + search );
    }
    
    // Setup the notify box's dismiss trigger.
