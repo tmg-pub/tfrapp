@@ -605,7 +605,12 @@ function API_SubmitApplication( event ) {
     folder.addFile( doc_file );
     parent_folder.removeFile( doc_file );
     document = DocumentApp.openById( doc_file.getId() );
+    
     doc_file.setSharing( DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW );
+    
+    if( event.document_owner ) {
+      doc_file.setOwner( event.document_owner );
+    }
     // TODO: Set owner too.
     resetApplication( document, event.editcode, event.site_url );
   }
@@ -659,8 +664,10 @@ function API_Check( event ) {
 }
 
 function test() {
-  document = DocumentApp.openById( "17kctBHvrzSU-CcVZdW09OjKvg07mhN1f--TDMdOyx5M" );
-  Logger.log( getAppInput( document ) );
+  var docid = "1VpzysHB7L9fO0zvKW9ajIwakj7iqujmtrvPCuqXtzmY";
+  document = DocumentApp.openById( docid );
+  //Logger.log( getAppInput( document ) );
   //resetApplication( document );
-  resetAppStatus( document );
+  //resetAppStatus( document );
+  var doc_file = DriveApp.getFileById( document.getId() )
 }
