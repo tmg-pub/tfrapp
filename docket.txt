@@ -1,8 +1,10 @@
-editcodes are using short form now
-parse editcode from query string
-conver to uppercase.
+more logging
 
 maintenance must be run
 ---
 .htaccess
 
+v STATUS should be reset for EVERY submission.
+v reset this in script.js too
+v transfer app owner to configurable
+v don't let them read applications that are not editable.

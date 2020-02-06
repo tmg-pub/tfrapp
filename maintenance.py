@@ -20,4 +20,6 @@ dbc.execute( "DELETE FROM Apps WHERE updated < %(expire_time)s"
              })
 db.commit()
 
+# Todo: cleanup log files.
+
 print( "Done." )

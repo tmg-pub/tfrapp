@@ -85,7 +85,7 @@ towards?
 
 [SECTION OOC_SECTION]
 OOC Section
-The following section is out of character; the rest of the application is meant
+The following section is out-of-character; the rest of the application is meant
 for you, the player, to answer so that we can get an idea of who you are.
 Please fill out the following below as accurately as possible in complete
 sentences and in your own words.
@@ -98,12 +98,12 @@ codes if applicable.
 [TEXT DISCORD OPTIONAL]
 (Optional) What is your Discord tag?
 
-[TEXT REFERRAL]
-Where did you hear about the First Regiment and why do you wish to join?
-
 [TEXT OOC_AGE]
 Are you over the age of 17? We do not accept applicants who are under this age
 threshold.
+
+[TEXT REFERRAL]
+Where did you hear about the First Regiment and why do you wish to join?
 
 [TEXT RP_EXPERIENCE]
 Please give a brief summary of your role-playing experience. What, if any,
@@ -190,8 +190,7 @@ Please allow up to 72 hours for it to be processed. An officer will respond via
 in-game mail addressed to the character you applied on. If you need to correct
 your application, feel free to edit it and submit it again.<br>
 <br>
-If you have any questions or concerns, you may contact our officers in-game or
-join our help Discord!<br>
+If you have any questions or concerns, you may contact our officers in-game.<br>
 <br>
 <div style="width: 100%; text-align:center">
 <b>Officers of the First Regiment</b><br>
