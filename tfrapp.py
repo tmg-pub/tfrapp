@@ -16,6 +16,7 @@ import traceback
 import yaml
 import random
 import time
+import cgi
 
 #------------------------------------------------------------------------------
 with open( "private/config.yaml", "rb" ) as fp:
@@ -25,6 +26,11 @@ devmode = config.get("devmode", False)
 output = [];
 
 now = int(time.time())
+
+try:
+   remote_address = cgi.escape( os.environ["REMOTE_ADDR"] )
+except:
+   remote_address = "UNKNOWN"
 
 #------------------------------------------------------------------------------
 # Abort the script and respond with HTTP 500. We can be lazy because this isn't
@@ -110,12 +116,18 @@ def ConnectToDatabase():
 # Helper function to fetch a document ID from an editcode, using an active
 #                                                      database connection.
 def LookupDocid( dbc, editcode ):
+   
+   Log( "Looking up document ID from editcode:", editcode )
    dbc.execute( "SELECT docid FROM Apps WHERE editcode=%(editcode)s",
                 {
                    "editcode": editcode
                 })
    result = dbc.fetchone()
-   if result: return result[0]
+   if result:
+      Log( "Found document ID.", result[0] )
+      return result[0]
+      
+   Log( "That editcode isn't registered." )
    
    # Not found.
    return None
@@ -156,6 +168,7 @@ def ExecuteAppsScript( request, script_id ):
       ).execute()
       
       if 'error' in response:
+         Log( "Error when executing apps script. See error log." );
          # The API executed, but the script returned an error.
 
          # Extract the first (and only) set of error details. The values of
@@ -173,6 +186,7 @@ def ExecuteAppsScript( request, script_id ):
                   LogError( "\t%s: %s" % (trace['function'], trace['lineNumber']) )
          response = None;
    except errors.HttpError as e:
+      Log( "HTTP error when executing apps script. See error log." );
       # The API encountered a problem before the script started executing.
       LogError( "HTTP Error" )
       LogError( e.content )
@@ -251,6 +265,22 @@ def GetGoogleDocsService():
 #              should have a way to be pruned (setup a maintenance cron job).
 def LogFilePath( prefix ):
    return "logs/%s-%s.log" % (prefix, datetime.now().strftime('%Y-%m-%d'))
+   
+#------------------------------------------------------------------------------
+# Log normal data.
+logfile = None
+def Log( *args ):
+   global logfile, remote_address
+   now = datetime.now()
+   if not logfile:
+      logfile = open( LogFilePath("log"), 'a' )
+      print( "-- %s - %s - %s --" 
+             % ( sys.argv[0]
+               , now.strftime('%Y-%m-%d  %H:%M:%S')
+               , remote_address
+               )
+             , file = logfile )
+   print( now.strftime('[%Y-%m-%d %H:%M:%S]'), *args, file = logfile )
    
 #------------------------------------------------------------------------------
 # Log data to the debug log, if devmode is enabled.

@@ -18,7 +18,10 @@ def main():
    docid    = None
    editcode = None
    
+   Me.Log( "User is submitting an app." )
+   
    if "editcode" in input:
+      Me.Log( "User is updating their app. Editcode=%s" % input["editcode"] )
       # Check their key and load a document ID.
       editcode = input["editcode"]
       docid = Me.LookupDocid( dbc, editcode )
@@ -32,6 +35,7 @@ def main():
    if not docid:
       newdoc   = True
       editcode = Me.MakeEditcode()
+      Me.Log( "New document. Editcode = ", editcode )
    
    script_arg = {
       "editcode"       : editcode,
@@ -63,6 +67,7 @@ def main():
    else:
       if response["response"]["result"]["status"] == "OK":
          
+         Me.Log( "Inserting/updating entry in database." )
          # Save a record in our database of everything so that the user can
          #  easily access it through the editcode.
          dbc.execute(
@@ -78,6 +83,7 @@ def main():
          )
          db.commit()
          
+         Me.Log( "Responding to user." )
          Me.Output({
             "status"   : "SUBMITTED",
             "editcode" : editcode

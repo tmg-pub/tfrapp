@@ -9,7 +9,11 @@ def main():
    input = Me.GetRequestBody()
    docid = None
    
+   
    if "editcode" in input:
+      
+      Me.Log( "Checking app with editcode.", input["editcode"] )
+      
       # Check their key and load a google doc ID.
       editcode = input["editcode"]
       db, dbc  = Me.ConnectToDatabase()
@@ -18,9 +22,10 @@ def main():
       db.close()
       
       if not docid:
-         Me.DebugLog( "Got bad code." )
+         Me.Log( "Couldn't locate document. Aborting." )
          Me.Abort()
    else:
+      Me.Log( "Got request without editcode." )
       Me.Abort()
    
    request = {
