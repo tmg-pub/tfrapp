@@ -66,7 +66,7 @@ https://developers.google.com/oauthplayground/#step1&scopes=https%3A%2F%2Fwww.go
 
 Press Authorize APIs, and then Exchange authorization code for tokens.
 
-Copy the refresh token generated and put it in `private/client_refresh.json`
+Copy the refresh token generated and put it in `private/client_token.json`
 which should look like this:
 
 {
@@ -78,3 +78,9 @@ generated with a previous refresh token.
 
 The last step here should be made easier in the future with a script to
 generate the required tokens on a local client.
+
+Files in the private directory for a fresh install should be:
+- client_token.json    # the refresh token
+- config.yaml          # app configuration
+- oauth_client.json    # oauth credentials for your google account
+- service_account.json # service account credentials for the project

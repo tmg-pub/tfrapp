@@ -21,7 +21,7 @@ import time
 with open( "private/config.yaml", "rb" ) as fp:
    config = yaml.full_load( fp )
 
-devmode = os.path.exists( ".devmode" )
+devmode = config.get("devmode", False)
 output = [];
 
 now = int(time.time())
@@ -35,10 +35,9 @@ def Abort():
    sys.exit( 0 )
 
 #------------------------------------------------------------------------------
-# Returns true if the password matches our devmode password, or if the bypass
-#                          file is present (.devmode) in the working directory.
-def Devmode( password ):
-   return devmode or password == Me.config.get("devmode_password")
+# Returns true if running in developer mode.
+def Devmode():
+   return devmode
    
 #------------------------------------------------------------------------------
 # Output data to the client. This is buffered to allow printing of the HTTP

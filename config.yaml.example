@@ -18,6 +18,11 @@ apps_folder: "QnJlYWtmYXN0IGlzIHRoZSBtb3N0IGltc"
 # Used in the application generation to create links.
 site_url: "thetestiment.com/app"
 
+# Who to set the document owner to. Note that using this option will notify the
+#  email address that they were set at the owner, every time an app is
+#  submitted.
+document_owner: "gm@guild.com"
+
 # SQL database access information.
 sql:
    host     : "mysql.minecraft.net"

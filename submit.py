@@ -7,7 +7,6 @@ import json
 # API for users to submit applications.
 # Request is in the format:
 # {
-#    devmode: Optional devmode password.
 #    editcode: If given, we will try to edit an existing application rather
 #              than creating a new one.
 #    parts: Parts of the application. Includes both prompts and answers.
@@ -37,7 +36,6 @@ def main():
    script_arg = {
       "editcode"       : editcode,
       "apps_folder"    : Me.config["apps_folder"],
-      "document_owner" : Me.config["document_owner"],
       "discord"        : Me.config["discord_webhooks"],
       "site_url"       : Me.config["site_url"],
       "app"            : {
@@ -48,10 +46,13 @@ def main():
    # otherwise, a new document will be created.
    if docid: script_arg["docid"] = docid
    
+   if "document_owner" in Me.config:
+      script_arg["document_owner"] = Me.config["document_owner"]
+   
    response = Me.ExecuteAppsScript(
       {
          "function"   : "API_SubmitApplication",
-         "devMode"    : Me.Devmode( input.get("devmode") ),
+         "devMode"    : Me.Devmode(),
          "parameters" : [ script_arg ]
       },
       Me.config["tfr_apps_script"]
