@@ -1,5 +1,8 @@
 RewriteEngine on
 
+# For inheriting things like HTTPS redirects.
+RewriteOptions inherit
+
 # Dummy rule to set our base path variable.
 # Change this to match your server folder.
 RewriteRule .* - [E=TFRAPP_BASE_PATH:/tfrapp]
