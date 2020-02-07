@@ -4,6 +4,17 @@ import tfrapp as Me
 import json
 
 #------------------------------------------------------------------------------
+# Returns the applicant's name from their answers. Used for the log file.
+def GetAppName( parts ):
+   try:
+      for part in parts:
+         if( part["key"] == "NAME" ):
+            return part["val"]
+   except: pass
+      
+   return "(Unknown)"
+
+#------------------------------------------------------------------------------
 # API for users to submit applications.
 # Request is in the format:
 # {
@@ -36,6 +47,8 @@ def main():
       newdoc   = True
       editcode = Me.MakeEditcode()
       Me.Log( "New document. Editcode = ", editcode )
+   
+   Me.Log( "Building submit request. Name = %s" % GetAppName( input["parts"] ))
    
    script_arg = {
       "editcode"       : editcode,

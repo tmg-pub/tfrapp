@@ -3,13 +3,10 @@
 Upload the contents of the app to the server minus any private files (beginning
 with dots).
 
-A .devmode file present in the base directory will trigger developer mode,
-alternatively triggered through a password in the request.
-
 Make sure the folders named "private" and "logs" have strict permissions on the
 server, to prevent anything outside from reading the contents. They includes an
 .htaccess file to deny the web, but there are other things that may creep in
-there.
+there. The logs file can contain private IDs.
 
 TODO: understand Unix permissions. :)
 
@@ -24,9 +21,9 @@ See config.yaml.example for an example script.
 -------------------------------------------------------------------------------
 On the server:
 
-pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
-pip install --upgrade mysql-connector
-pip install --upgrade pyyaml
+python3 -m pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+python3 -m pip install --upgrade mysql-connector
+python3 -m pip install --upgrade pyyaml
 
 
 4. Deal with hassles
