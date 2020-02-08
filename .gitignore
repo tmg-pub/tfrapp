@@ -4,3 +4,4 @@ logs/*
 !logs/.htaccess
 __pycache__
 .devmode
+.htaccess
