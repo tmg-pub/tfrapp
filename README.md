@@ -65,5 +65,5 @@ Files in the private directory for a fresh install should be:
 - service_account.json # service account credentials for the project
 
 ### For Maintenance
-If necessary, can set up a cron job to regularly run maintendance.py. This script prunes out old application entries from the SQL cache, and diagnostic log files.
+If necessary, set up a cron job to regularly run maintendance.py. This script prunes out old application entries from the SQL cache, and diagnostic log files.
 
