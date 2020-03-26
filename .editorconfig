@@ -1,22 +1,21 @@
+#------------------------------------------------------------------------------
+# EditorConfig is awesome (editorconfig.org).
+#
+# root: don't check above this folder.
 root = true
-
-[*]
-end_of_line = crlf
-
-# 4 space indentation
-[*.py]
+#------------------------------------------------------------------------------
+# Some projects have this, but it's not a good idea when working
+# cross-platform. Linux needs LF to work properly.
+#[*]
+#end_of_line = crlf
+#------------------------------------------------------------------------------
+# Hipster 3-space indentation for most code.
+[*.py, *.js, *.css]
 indent_style = space
 indent_size  = 3
-
-# Indentation override for all JS under lib directory
-[*.js]
-indent_style = space
-indent_size  = 3
-
-[*.css]
-indent_style = space
-indent_size  = 3
-
+#------------------------------------------------------------------------------
+# I would prefer 3-space tabs here too, but the Google Apps Script editor is
+#  too picky.
 [*.gs]
 indent_style = space
 indent_size  = 2
