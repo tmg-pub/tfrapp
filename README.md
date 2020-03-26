@@ -10,16 +10,20 @@ Upload the contents of the app to the server minus any private files (beginning 
 Make sure the folders named "private" and "logs" have strict permissions on the server, to prevent anything outside from reading the contents. They include an .htaccess file to deny the web, but there are other things that may creep in there. The logs file can contain private IDs. 
 
 ### 2. Configure the application.
-private/config.yaml holds most of your configuration.
+`private/config.yaml` holds most of your configuration.
 
-See config.yaml.example for an example script.
+See `config.yaml.example` for an example script.
+
+You should also set up the .htaccess file in the root, see `example.htaccess` and follow the instructions inside.
+
+As for what shows up on your application to the users, that is controlled by `app.txt`. See app.example.txt for instructions.
 
 ### 3. Install required libraries
 On the server:
 
-python3 -m pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
-python3 -m pip install --upgrade mysql-connector
-python3 -m pip install --upgrade pyyaml
+    python3 -m pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+    python3 -m pip install --upgrade mysql-connector
+    python3 -m pip install --upgrade pyyaml
 
 ### 4. Deal with hassles
 For some inane reason, the year is 2020 and linux fails reading the shebang if line endings are CRLF, though you shouldn't have that problem unless something strange happens as everything is checked in as LF.
