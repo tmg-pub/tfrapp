@@ -1,0 +1,211 @@
+#------------------------------------------------------------------------------
+# TFR Application Configuration
+#
+# This document contains the template that is shown to the applicant.
+#
+# [SECTION <KEY>] marks each section of the application. The line following
+# will be shown in big letters. The lines after will be shown as a description
+# paragraph.
+#
+# HTML is allowed in any text for styling purposes.
+# 
+# All prompts and descriptions are terminated by an empty line. If you want a
+# line-break in the text, use <br>.
+# 
+# [TEXT <KEY>] adds a text field. This is the only kind of field supported
+# currently. <KEY> is a unique one-word identifier.
+# [TEXT <KEY> OPTIONAL] makes an optional field.
+#------------------------------------------------------------------------------
+
+[SECTION IC_SECTION]
+Stormwind Army Enlistment Form
+Please fill out the following below as accurately as possible in complete
+sentences and in your own words. If you are unable to reply with an answer,
+please give a brief explanation.
+
+[TEXT NAME]
+What is your full name and race?
+
+[TEXT BIRTHAGE]
+What is your place of birth and current age?
+
+[TEXT RESIDENCE]
+Where do you currently live?
+
+[TEXT PREVIOUS_OCCUPATIONS]
+What are your previous occupations?
+
+[TEXT SKILLS]
+What skills do you have to offer?
+
+[TEXT FITNESS]
+Are you physically fit to serve as a soldier? Do you have any ailments,
+injuries, or curses?
+
+[TEXT CRIMINAL]
+Do you have a criminal record? If so, explain your crimes and any punishments
+endured.
+
+[TEXT NEXT_OF_KIN]
+Who would you name as your next of kin should you perish on the battlefield?
+What is their relation to you? Where do they live?
+
+[TEXT ACCEPT_FEALTY]
+Do you acknowledge that by enlisting in the Stormwind Army, you will be
+expected to swear fealty, service, and loyalty to the Kingdom of Stormwind and
+the House of Wrynn above all other nations and obligations?
+
+[TEXT ACCEPT_DISCIPLINE]
+Do you acknowledge that by enlisting in the Stormwind Army, you will be
+expected to adopt our ethos, conduct, and way of life as a disciplined soldier?
+
+[TEXT ACCEPT_RISK]
+Do you acknowledge that by enlisting in the Stormwind Army, you may be sent to
+armed conflict in any part of Azeroth or beyond, with the associated risks and
+responsibilities involved?
+
+[TEXT ACCEPT_DUTY]
+Do you acknowledge that by enlisting in the Stormwind Army, you may be asked to
+take lives in the act of protecting the Kingdom of Stormwind’s interests?
+
+[TEXT WHY_THE_ARMY]
+Why do you wish to serve with the Stormwind Army? If you are not originally a
+subject of the kingdom, why do you wish to enlist to serve Stormwind over your
+homeland?
+
+[TEXT FIELDS_OF_INTEREST]
+Which of these fields within the Royal Army do you think you would be inclined
+towards?
+<ul><li>Infantry</li>
+<li>Engineering</li>
+<li>Scouting</li>
+<li>Magic</li>
+<li>Medical</li>
+<li>The Church</li></ul>
+
+[SECTION OOC_SECTION]
+OOC Section
+The following section is out-of-character; the rest of the application is meant
+for you, the player, to answer so that we can get an idea of who you are.
+Please fill out the following below as accurately as possible in complete
+sentences and in your own words.
+
+[TEXT OOC_NAME]
+Character name, race, class, and level. This must exactly match your character
+name in-game, otherwise we will not be able to contact you. Must include alt
+codes if applicable.
+
+[TEXT DISCORD OPTIONAL]
+(Optional) What is your Discord tag?
+
+[TEXT OOC_AGE]
+Are you over the age of 17? We do not accept applicants who are under this age
+threshold.
+
+[TEXT REFERRAL]
+Where did you hear about the First Regiment and why do you wish to join?
+
+[TEXT RP_EXPERIENCE]
+Please give a brief summary of your role-playing experience. What, if any,
+role-playing guilds have you been part of? If you were a member of the First
+Regiment before, what were the circumstances of you leaving?
+
+[TEXT GUILD_RULES_AGREEMENT]
+Have you read our
+<a href="https://the-first-regiment.fandom.com/wiki/Guild_Rules" target="_blank">Guild Rules</a>?
+And will you abide by them?
+
+[TEXT SERVICE_RECORD_AGREEMENT]
+Have you read our
+<a href="https://the-first-regiment.fandom.com/wiki/Service_Record" target="_blank">Service Record</a>
+page? It gives an idea of what you can expect to positively and negatively
+affect your character progression.
+
+[TEXT CHARACTER_DESCRIPTION]
+Please describe some basic details about your character – who they are and what
+they are like. Some concepts may be rejected if we think they will negatively
+affect the theme of our guild.
+
+[TEXT CHARACTER_HISTORY]
+Please describe some basic history about your character. Your character must
+make sense within Warcraft’s lore. If you are new to World of Warcraft
+role-play, our officers would be happy to assist you with your story.
+
+[TEXT WRITING_SAMPLE]
+Please provide a sample of your writing, as if you were creating an emote
+in-game regarding anything at all. At least 40 words. Our rules enforce proper
+writing for all members, so please be careful to not make any mistakes.
+
+[TEXT CHARACTER_MISC OPTIONAL]
+Is there anything else you’d like to let us know about your character? Are
+there plotlines that your character is involved in that could involve the
+guild?
+
+[TEXT CHARACTER_ART OPTIONAL]
+(Optional) Do you have any art done of your character? If so, feel free to
+link it here.
+
+[SECTION WRITING_PROMPTS]
+Writing Prompts
+The following prompts are optional. They are here to provide extra curricular
+activity for applicants who somehow aren’t satiated yet. You can respond to as
+many as you’d like with as much text as you’d like.
+
+[TEXT WRITING_PROMPT_WALK OPTIONAL]
+You're walking through the Elwynn woods; there's nobody around and you have no
+torch or lantern. A sound creeks from behind you, like the snapping of a
+branch. Out of the corner of your eye you spot a man in rags raising his hands
+for your attention. He looks gaunt and has a disturbed glint in his eyes. What
+do you do?
+
+[TEXT WRITING_PROMPT_NIGHT_VISITOR OPTIONAL]
+Your company has been deployed abroad and it is now the middle of the night;
+you've been given night-watch duty and are the only one awake at the camp's
+edge when an unnamed figure approaches. He is wearing tattered robes and tells
+that he's been lost in the wilds for several weeks and now dearly requests for
+a night to rest safely within your encampment. What do you do?
+
+[TEXT WRITING_PROMPT_WOUNDED_DECISION OPTIONAL]
+Your team has just finished fending off an ambush and several people are
+wounded. Among the most grievously hurt is your company lieutenant, a field
+medic, and a high-value civilian; each of them are unconscious. With very
+limited supplies, what do you do?
+
+[TEXT WRITING_PROMPT_FLOGGED_CIVILIAN OPTIONAL]
+You see the sad sight of a civilian being flogged by an official. You do not
+know what the crime was, but it would appear that the official is enjoying
+inflicting pain. A lord baron is observing the punishment as well. What do you
+do?
+
+[TEXT WRITING_PROMPT_PUNISHED_SOLDIER OPTIONAL]
+A soldier is being reprimanded and will face severe punishment for something
+that was <b>your</b> fault, but everyone, including the soldier, does not know
+that. You do not know the soldier. What do you do?
+
+[CLOSER]
+<h2>Submitted</h2>
+Your application has been recorded.<br>
+<br>
+Please allow up to 72 hours for it to be processed. An officer will respond via
+in-game mail addressed to the character you applied on. If you need to correct
+your application, feel free to edit it and submit it again.<br>
+<br>
+If you have any questions or concerns, you may contact our officers in-game.<br>
+<br>
+<div style="width: 100%; text-align:center">
+<b>Officers of the First Regiment</b><br>
+Grand Marshal Maxen Montclair<br>
+Lord-Marshal Ismond Laldere<br>
+Knight-Captain Alison Clement<br>
+Knight-Captain Julian Reynard<br>
+Knight-Captain Roy Sebale<br>
+Knight-Captain Thomas Reignsford<br>
+Knight-Lieutenant Valrik Gallaghan<br>
+Lieutenant Abigail Potter<br>
+Lieutenant Kimberly Montclair<br>
+Lieutenant Melanie Witherseed<br>
+Lieutenant Thaddeus Locke<br>
+Lieutenant Tilliea Furlbrow<br>
+</div>
+
+
