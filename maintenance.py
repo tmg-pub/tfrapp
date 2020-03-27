@@ -2,24 +2,27 @@
 import tfrapp as Me
 import time
 
-# System maintenance script. Should be called whenever periodically.
+# Maintenance script. Should be called periodically to clean out old files, just like you should clean those vents in your computer.
 
 print( "Starting maintenance routine." )
+#------------------------------------------------------------------------------
 
 print( "Connecting to database." )
 db, dbc = Me.ConnectToDatabase()
 
 curtime = int(time.time())
+
+# The time before old application links are killed.
 expire_time = curtime - 60 * 60 * 24 * 90 # 90 days
 
 print( "--" )
-print( "Deleting old applications from database. The google doc is permanent." )
+print( "Deleting old application links from database. The google doc is permanent for your records." )
 dbc.execute( "DELETE FROM Apps WHERE updated < %(expire_time)s"
            , {
                 "expire_time": expire_time
              })
 db.commit()
 
-# Todo: cleanup log files.
+# Todo: delete old log files!
 
 print( "Done." )

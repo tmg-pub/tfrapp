@@ -1,9 +1,10 @@
 # TFRAPP by Potter-MoonGuard (c) 2020
-# Testing sandbox.
 from __future__ import print_function
 from googleapiclient import errors
 import json
 import tfrapp as Me
+
+# Just a testing sandbox script for development purposes.
 
 def main():
 

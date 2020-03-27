@@ -1,6 +1,8 @@
-# A script to ease the pain that is RUNNING PYTHON ON A LINUX SHARED SERVER
+# A script for deployment mirrors to ease the pain that is running Python on a
+# shared server. Changes all shebangs to the executable you specify.
+# Also sets 755 permissions on all python files so the webserver can execute them.
+#
 # Usage: python3 shebang.py "path to PYTHON BINARY"
-# Also sets 0o755 permissions on all python files so the webserver can execute them.
 import glob, os
 import re
 import sys
@@ -17,5 +19,4 @@ for file in glob.glob("*.py"):
    os.chmod( file, 0o755 )
    print( file )
    
-
-print( "done" )
+print( "Done." )

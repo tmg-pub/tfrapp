@@ -3,6 +3,11 @@
 import tfrapp as Me
 import re
 
+# This code is no longer used. While it seemed like a good idea on paper to
+#  load the configuration from a Google document, it's too slow and unwieldy.
+#  It's much easier to just load from a simple text script, and it is now done
+#  entirely on the front-end in JavaScript.
+
 #------------------------------------------------------------------------------
 # This reads the configuration/template file from a Google doc and parses out
 #  the values. It packages them and returns them to the user javascript to

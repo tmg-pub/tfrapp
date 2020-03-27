@@ -1,5 +1,5 @@
 # TFRAPP by Potter-MoonGuard (c) 2020
-# Not executable on the server.
+# Setup tools. This should certainly not be executable on the server by users.
 import sys
 import tfrapp as Me
 
@@ -11,6 +11,8 @@ if len(sys.argv) < 2:
 #//////////////////////////////////////////////////////////////////////////////
 def BasicSetup():
    db, dbc = Me.ConnectToDatabase()
+   
+   # In case you want to reset everything.
    #dbc.execute( """DROP TABLE Apps""" )
    
    # editcode: The code that we can use to edit or read the application.
@@ -27,14 +29,5 @@ def BasicSetup():
       )
    """)
    
-#   dbc.execute( """
-#      CREATE TABLE IF NOT EXISTS EditKeys (
-#        shortcut VARCHAR(16) PRIMARY KEY,
-#        editcode BINARY(16) UNIQUE,
-#        expires BIGINT
-#      )
-#   """)
-   
 if sys.argv[1] == "run":
    BasicSetup()
-   

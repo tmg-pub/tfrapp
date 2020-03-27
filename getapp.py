@@ -8,6 +8,9 @@ import tfrapp as Me
 #------------------------------------------------------------------------------
 # This is to read the application content from the server to update the
 #  user's cache when using an edit link.
+#
+# TODO: Delete this. No longer used. The application contents are read directly
+#  from the Google document now, and returned from checkapp.py.
 def main():
    input = Me.GetRequestBody()
    db, dbc = Me.ConnectToDatabase()

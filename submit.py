@@ -4,17 +4,6 @@ import tfrapp as Me
 import json
 
 #------------------------------------------------------------------------------
-# Returns the applicant's name from their answers. Used for the log file.
-def GetAppName( parts ):
-   try:
-      for part in parts:
-         if( part["key"] == "NAME" ):
-            return part["val"]
-   except: pass
-      
-   return "(Unknown)"
-
-#------------------------------------------------------------------------------
 # API for users to submit applications.
 # Request is in the format:
 # {
@@ -22,6 +11,20 @@ def GetAppName( parts ):
 #              than creating a new one.
 #    parts: Parts of the application. Includes both prompts and answers.
 # }
+#
+
+#------------------------------------------------------------------------------
+# Returns the applicant's name from their answers. Used for the log file.
+def GetAppName( parts ):
+   try:
+      for part in parts:
+         if( part["key"] == "NAME" ):
+            return part["val"]
+   except: pass
+   
+   return "(Unknown)"
+
+#------------------------------------------------------------------------------
 def main():
    input = Me.GetRequestBody()
    
@@ -33,7 +36,8 @@ def main():
    
    if "editcode" in input:
       Me.Log( "User is updating their app. Editcode=%s" % input["editcode"] )
-      # Check their key and load a document ID.
+      # Check their key and load a document ID. If it exists, then that
+      #  document will be updated.
       editcode = input["editcode"]
       docid = Me.LookupDocid( dbc, editcode )
       if not docid:
@@ -44,6 +48,7 @@ def main():
    
    newdoc = False
    if not docid:
+      # Creating a new document. Generate a new editcode for it.
       newdoc   = True
       editcode = Me.MakeEditcode()
       Me.Log( "New document. Editcode = ", editcode )
@@ -63,6 +68,8 @@ def main():
    # otherwise, a new document will be created.
    if docid: script_arg["docid"] = docid
    
+   # This will cause the GAS side to assign a new owner after we're done
+   #  creating the document.
    if "document_owner" in Me.config:
       script_arg["document_owner"] = Me.config["document_owner"]
    
@@ -83,6 +90,10 @@ def main():
          Me.Log( "Inserting/updating entry in database." )
          # Save a record in our database of everything so that the user can
          #  easily access it through the editcode.
+         # We don't use the `content` field anymore, in favor of just reading
+         #  the google document directly, but it doesn't hurt to have a mirror
+         #  of their application in case something goes wrong on the GAS side
+         #  (their work can be recovered by an admin).
          dbc.execute(
             "INSERT INTO Apps (editcode, docid, updated, content) "
             "VALUES (%(editcode)s, %(docid)s, %(updated)s, %(content)s ) "
@@ -96,6 +107,8 @@ def main():
          )
          db.commit()
          
+         # The user will save the editcode and show the finish page. Otherwise
+         #  they will get a server error message.
          Me.Log( "Responding to user." )
          Me.Output({
             "status"   : "SUBMITTED",

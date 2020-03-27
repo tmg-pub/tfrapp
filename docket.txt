@@ -1,9 +1,11 @@
-more logging
-
+Docket of things to work on, sorted by priority.
+-------------------------------------------------------------------------------
 maintenance must be run
----
 .htaccess
 
+-------------------------------------------------------------------------------
+(Completed)
+v more logging
 v STATUS should be reset for EVERY submission.
 v reset this in script.js too
 v transfer app owner to configurable

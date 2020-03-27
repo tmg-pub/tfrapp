@@ -1,4 +1,6 @@
-#todo; work this into a script to run on the local machine to create credentials required.
+# TODO: This is not a file used in the project, just a dump of code to be later
+#  molded into a script to run on the local machine to create the credentials
+#  required.
 
 from __future__ import print_function
 
