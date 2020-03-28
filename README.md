@@ -7,12 +7,10 @@ This is a project to provide a pretty application interface for people to apply 
 ### 1. Upload to the server.
 Upload the contents of the app to the server minus any private files (beginning with dots).
 
-Make sure the folders named "private" and "logs" have strict permissions on the server, to prevent anything outside from reading the contents. They include an .htaccess file to deny the web, but there are other things that may creep in there. The logs file can contain private IDs. 
+Make sure the folders named "private" and "logs" have strict permissions on the server to prevent anything outside from reading the contents. They include an .htaccess file to deny the public web, but there are other things that may creep in there. The logs file can contain private IDs.
 
 ### 2. Configure the application.
-`private/config.yaml` holds most of your configuration.
-
-See `config.yaml.example` for an example script.
+`private/config.yaml` holds most of your configuration. See `config.yaml.example` for an example script.
 
 You should also set up the .htaccess file in the root, see `example.htaccess` and follow the instructions inside.
 
@@ -26,9 +24,9 @@ On the server:
     python3 -m pip install --upgrade pyyaml
 
 ### 4. Deal with hassles
-For some inane reason, the year is 2020 and linux fails reading the shebang if line endings are CRLF, though you shouldn't have that problem unless something strange happens as everything is checked in as LF.
+For some inane reason, the year is 2020 and Linux fails reading the shebang if line endings are CRLF, though you shouldn't have that problem unless something strange happens during checkout.
 
-Shared hosting may want you to jump through some hoops to install any required packages. I had to install a custom version of python to deploy to Dreamhost's shared servers.
+Shared hosting may want you to jump through some hoops to install any required packages. I had to install a custom version of Python to deploy to Dreamhost's shared servers, as their default installation didn't have the required libraries.
 
 ### 5. Create your authorization files.
 This part may be a bit painful. The things you need to create are a service account as well as a "web client".
@@ -69,5 +67,5 @@ Files in the private directory for a fresh install should be:
 - service_account.json # service account credentials for the project
 
 ### For Maintenance
-If necessary, set up a cron job to regularly run maintendance.py. This script prunes out old application entries from the SQL cache, and diagnostic log files.
+If necessary, set up a cron job to regularly run maintenance.py. This script prunes out old application entries (from the SQL cache) and diagnostic log files.
 
